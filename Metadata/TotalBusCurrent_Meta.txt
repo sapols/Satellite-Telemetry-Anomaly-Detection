@@ -1,0 +1,23 @@
+dataset_name: TotalBusCurrent
+
+cadence: 24 hours
+contains_nans: False
+time_range: 2004-02-14T00:00:00 through 2018-10-02T00:00:00
+number_of_samples: 5,345
+independent_variable: time (YYYY-MM-DD HH:MM:SS)
+dependent_variable: current (A)
+
+
+preprocessing: {
+	fill_nans: linear interpolation
+	resample: 24 hour mean
+	note: Few nans, so interpolation made sense. So highly resampled because values fluctuated like crazy.
+}
+
+
+provenance: {
+	orig_cadence: 5 minutes
+	orig_contains_nans: True
+	orig_time_range: 2004-02-13T13:02:30 through 2018-10-02T23:57:30
+	orig_number_of_samples: 1.518180e+06
+}

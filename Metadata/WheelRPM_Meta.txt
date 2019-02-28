@@ -1,0 +1,22 @@
+dataset_name: WheelRPM
+
+cadence: 5 minutes
+contains_nans: False
+time_range: 2009-05-22T22:35:00 through 2018-10-02T18:25:00
+number_of_samples: 984,911
+independent_variable: time (YYYY-MM-DD HH:MM:SS)
+dependent_variable: RPM
+
+
+preprocessing: {
+	fill_nans: 0
+	resample: 5 minute mean
+	note: data was mostly nans because wheel is usually stationary, so 0 RPMs made sense
+}
+
+
+provenance: {
+	orig_cadence: 1 second
+	orig_contains_nans: True
+	orig_time_range: 2009-05-22T22:30:47.000 through 2019-02-13T17:00:00
+}

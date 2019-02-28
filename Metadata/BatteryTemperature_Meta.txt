@@ -1,0 +1,22 @@
+dataset_name: BatteryTemperature
+
+cadence: 1 hour
+contains_nans: False
+time_range: 2008-05-30T00:05:00 through 2018-10-02T18:30:00
+number_of_samples: 128,288
+independent_variable: time (YYYY-MM-DD HH:MM:SS)
+dependent_variable: temperature (C)
+
+
+preprocessing: {
+	fill_nans: linear interpolation
+	resample: 1 hour mean
+	note: Few nans, so interpolation made sense. There were many 0's, however, and they were also treated as nans and interpolated away.
+}
+
+
+provenance: {
+	orig_cadence: 16 seconds
+	orig_contains_nans: True
+	orig_time_range: 2008-05-30T00:07:02 - 2018-10-02T18:30:09
+}
