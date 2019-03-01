@@ -135,7 +135,7 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose):
         return time_series_with_outliers, outliers
 
 
-def standard_deviation_anomalies_wheel_temp(dataset_path='Data/WheelTemperature.csv',plots_save_path=None,
+def standard_deviation_anomalies_wheel_temp(dataset_path='Data/WheelTemperature.csv', plots_save_path=None,
                                             verbose=False, use_rolling_mean=False, window=0, num_stds=2):
     """Detect outliers in the wheel temperature data by one of the following methods:
        1) comparing points against [num_stds] standard deviations from the dataset mean
