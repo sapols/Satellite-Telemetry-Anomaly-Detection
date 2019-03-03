@@ -63,7 +63,7 @@ def detect_anomalies_with_arima(ts, size, order, seasonal_order=(), grid_search=
         print('Grid search found hyperparameters:')
         print(str(order) + ' ' + str(seasonal_order))
 
-    if len(seasonal_order < 4):
+    if len(seasonal_order) < 4:
         trained_model = ARIMA(train, order=order)
     else:
         trained_model = SARIMAX(train, order=order, seasonal_order=seasonal_order)
