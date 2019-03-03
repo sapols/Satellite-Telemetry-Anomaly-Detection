@@ -116,7 +116,7 @@ def detect_anomalies_with_arima(ts, size, order, seasonal_order=(), grid_search=
     print('Test MSE: %.3f' % test_error)
     print('MSE: %.3f' % model_error)
 
-    # plot the forecast
+    # plot the forecast TODO: move this under verbose
     X.plot(color='black', title='Dataset with Forecast and Outliers')  #TODO: pass in dataset name?
     test.plot(color='blue')
     predictions_with_dates.plot(color='green')
