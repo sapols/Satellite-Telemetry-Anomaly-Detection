@@ -3,6 +3,7 @@ import datetime
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot
+from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.stattools import acf, pacf
 from statsmodels.tsa.stattools import adfuller
@@ -14,23 +15,24 @@ __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
 
 
-def detect_anomalies_with_sarima(ts, size, order, seasonal_order, grid_search=False, path_to_model='',
+def detect_anomalies_with_arima(ts, size, order, seasonal_order=(), grid_search=False, path_to_model='',
                                  verbose=False, var_name='Value'):
     """Detect outliers in the time series data by comparing points against [num_stds] standard deviations from a rolling mean.
 
        Inputs:
            ts [pd Series]:         A pandas Series with a DatetimeIndex and a column for numerical values.
            size [float]:           The percentage of data to use for training, as a float (e.g., 0.66).
-           order [tuple]:          The order hyperparameters (p,d,q) for this SARIMA model.
-           seasonal_order [tuple]: The seasonal order hyperparameters (P,D,Q,freq) for this SARIMA model.
+           order [tuple]:          The order hyperparameters (p,d,q) for this ARIMA model.
+
 
        Optional Inputs:
-           grid_search [bool]:  When True, perform a grid search to set values for the 'order' and 'seasonal order' hyperparameters.
-                                Note this overrides any given values. Default is False.
-           path_to_model [str]: Path to a *.pkl file of a trained SARIMA model. When set, no training will be done because that model will be used.
-           verbose [bool]:      ??? When True, ???
-           var_name [str]:      The name of the dependent variable in the time series.
-                                Default is 'Value'.
+           seasonal_order [tuple]: The seasonal order hyperparameters (P,D,Q,freq) for this (S)ARIMA model.
+           grid_search [bool]:     When True, perform a grid search to set values for the 'order' and 'seasonal order' hyperparameters.
+                                   Note this overrides any given values. Default is False.
+           path_to_model [str]:    Path to a *.pkl file of a trained SARIMA model. When set, no training will be done because that model will be used.
+           verbose [bool]:         ??? When True, ???
+           var_name [str]:         The name of the dependent variable in the time series.
+                                   Default is 'Value'.
 
        Outputs:
            time_series_with_outliers [pd DataFrame]: A pandas DataFrame with a DatetimeIndex, a columns for numerical values, and an Outlier column (True or False).
@@ -40,7 +42,7 @@ def detect_anomalies_with_sarima(ts, size, order, seasonal_order, grid_search=Fa
            None
 
        Example:
-           time_series_with_outliers, outliers = detect_anomalies_with_sarima(time_series, order=(12, 0, 0),
+           time_series_with_outliers, outliers = detect_anomalies_with_arima(time_series, order=(12, 0, 0),
                                                                               seasonal_order=(0, 1, 0, 365),
                                                                               size=0.8, verbose=False)
     """
@@ -51,7 +53,7 @@ def detect_anomalies_with_sarima(ts, size, order, seasonal_order, grid_search=Fa
     train, test = X[0:split], X[split:len(X)]
     std = float(train.values.std(ddof=0))
 
-    if grid_search:
+    if grid_search:  #TODO: decide how to differentiate ARIMA vs. SARIMA for grid search
         if verbose:
             lag_acf = acf(ts, nlags=20)
             lag_pacf = pacf(ts, nlags=20, method='ols')
@@ -61,7 +63,10 @@ def detect_anomalies_with_sarima(ts, size, order, seasonal_order, grid_search=Fa
         print('Grid search found hyperparameters:')
         print(str(order) + ' ' + str(seasonal_order))
 
-    trained_model = SARIMAX(train, order=order, seasonal_order=seasonal_order)
+    if len(seasonal_order < 4):
+        trained_model = ARIMA(train, order=order)
+    else:
+        trained_model = SARIMAX(train, order=order, seasonal_order=seasonal_order)
 
     if path_to_model != '':
         # load pre-trained model
