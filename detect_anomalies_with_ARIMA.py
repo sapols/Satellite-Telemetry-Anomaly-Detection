@@ -13,8 +13,8 @@ from statsmodels.tsa.arima_model import ARIMAResults
 from sklearn.metrics import mean_squared_error
 
 # Custom modules
-from grid_search_hyperparameters import grid_search_arima_params  #TODO: make separate file for grid search
-from grid_search_hyperparameters import grid_search_sarima_params #TODO: make separate file for grid search
+from grid_search_hyperparameters import grid_search_arima_params  #TODO: make separate file for grid search (use progress bar?)
+from grid_search_hyperparameters import grid_search_sarima_params #TODO: make separate file for grid search (use progress bar?)
 
 __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
@@ -36,7 +36,8 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
            grid_search [bool]:     When True, perform a grid search to set values for the 'order' and 'seasonal order' hyperparameters.
                                    Note this overrides any given (p,d,q)(P,D,Q) hyperparameter values. Default is False.
            path_to_model [str]:    Path to a *.pkl file of a trained (S)ARIMA model. When set, no training will be done because that model will be used.
-           verbose [bool]:         ??? When True, ??? (show acf, pacf, plot residual training errors, predicted v. expected prints, )
+           verbose [bool]:         When True, show ACF and PACF plots before grid searching, plot residual training errors after fitting the model,
+                                   and print predicted v. expected values during outlier detection. TODO: mention plot w/ forecast & outliers once it's under an "if verbose"
            var_name [str]:         The name of the dependent variable in the time series.
                                    Default is 'Value'.
 
@@ -127,7 +128,7 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
     time_series_with_outliers = pd.DataFrame({var_name: X})
     time_series_with_outliers['Outlier'] = 'False'
 
-    # Label outliers using forecast
+    # Label outliers using the forecast
     for t in range(len(test)):
         obs = test[t]
         yhat = predictions_with_dates[test.index[t]]
@@ -148,7 +149,8 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
         print('Forecast error calculation failed:')
         print(e)
 
-    # plot the forecast TODO: move this under "if verbose"
+    # Plot the forecast and outliers
+    # TODO: move this under "if verbose"
     X.plot(color='black', title='Time Series with Forecast and Outliers')
     test.plot(color='blue')
     predictions_with_dates.plot(color='green')
