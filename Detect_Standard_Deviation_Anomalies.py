@@ -1,5 +1,6 @@
 # Standard modules
 import datetime
+import os
 import progressbar
 import pandas as pd
 import numpy as np
@@ -82,6 +83,8 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
         print('\nDetected Outliers: ' + str(len(outliers)) + "\n")
         outliers.plot(color='red', style='.')
     if plots_save_path:
+        if not os.path.exists(plots_save_path):
+            os.makedirs(plots_save_path)
         current_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         filename = plots_save_path + dataset_path.split('/')[-1] + ' with Outliers (' + current_time + ').png'
         pyplot.savefig(filename, dpi=500)
