@@ -7,7 +7,6 @@ from pandas import read_csv
 import numpy as np
 from matplotlib import pyplot
 
-
 # Custom modules
 from detect_anomalies_with_ARIMA import detect_anomalies_with_arima
 
