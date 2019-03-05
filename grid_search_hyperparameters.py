@@ -89,7 +89,7 @@ def grid_search_arima_params(ts):
                 except:
                     continue
     print('Best ARIMA%s MSE=%.3f' % (best_cfg, best_score))
-    order = best_cfg
+    order = best_cfg  # TODO: always returning the best score doesn't lead to constant overfitting, does it?
     return order
 
 
@@ -98,7 +98,7 @@ def grid_search_sarima_params(ts, freq):
 
        Inputs:
            ts [pd Series]: A pandas Series with a DatetimeIndex and a column for numerical values.
-           freq [int]:     The freq hyperparameter for this SARIMA model, i.e., the number of samples that make up one seasonal cycle.
+           freq [int]:     The freq hyperparameter for this SARIMA model, i.e., toohe number of time steps for a single seasonal period.
 
        Optional Inputs:
            None
@@ -114,4 +114,5 @@ def grid_search_sarima_params(ts, freq):
            order, seasonal_order = grid_search_sarima_params(time_series, seasonal_freq)
        """
 
+    # see: https://machinelearningmastery.com/how-to-grid-search-sarima-model-hyperparameters-for-time-series-forecasting-in-python/
     return order, seasonal_order
