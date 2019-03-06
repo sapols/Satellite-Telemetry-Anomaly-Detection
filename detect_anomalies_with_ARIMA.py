@@ -13,8 +13,8 @@ from statsmodels.tsa.arima_model import ARIMAResults
 from sklearn.metrics import mean_squared_error
 
 # Custom modules
-from grid_search_hyperparameters import grid_search_arima_params  #TODO: make separate file for grid search (use progress bar?)
-from grid_search_hyperparameters import grid_search_sarima_params #TODO: make separate file for grid search (use progress bar?)
+from grid_search_hyperparameters import grid_search_arima_params
+from grid_search_hyperparameters import grid_search_sarima_params
 
 __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
@@ -76,7 +76,7 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
             print('Grid search found hyperparameters: ' + str(order) + '\n')
         else:  # SARIMA grid search
             print('Seasonal frequency was given, so grid searching ARIMA(p,d,q)(P,D,Q) hyperparameters.')
-            order, seasonal_order = grid_search_sarima_params(ts, seasonal_freq)
+            order, seasonal_order, trend = grid_search_sarima_params(ts, seasonal_freq)
             print('Grid search found hyperparameters: ' + str(order) + str(seasonal_order) + '\n')
 
     # Train or load ARIMA/SARIMA model
@@ -88,7 +88,8 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
     if len(seasonal_order) < 4:
         trained_model = ARIMA(train, order=order)
     else:
-        trained_model = SARIMAX(train, order=order, seasonal_order=seasonal_order)
+        # TODO: consider enforce_stationarity=False and enforce_invertibility=False, unless that prevents from detecting 2 DSs not right for ARIMA
+        trained_model = SARIMAX(train, order=order, seasonal_order=seasonal_order, trend=trend)
 
     if path_to_model is not None:
         # load pre-trained model
@@ -155,7 +156,7 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
     test.plot(color='blue')
     predictions_with_dates.plot(color='green')
     if len(outliers) > 0:
-        print('Outliers: ' + str(len(outliers)) + '\n')
+        print('Detected outliers: ' + str(len(outliers)) + '\n')
         outliers.plot(color='red', style='.')
     pyplot.legend(loc='best')
     pyplot.show()
