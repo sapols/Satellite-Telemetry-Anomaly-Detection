@@ -22,8 +22,9 @@ def parser(x):
         return datetime.strptime(new_time, '%Y-%m-%d')  # for total bus current data
 
 
-def detect_arima_anomalies(dataset_path, train_size, order, seasonal_order=(), seasonal_freq=None, grid_search=False,
-                           path_to_model=None, var_name='Value', plots_save_path=None, verbose=False):
+def detect_arima_anomalies(dataset_path, train_size, order, seasonal_order=(), seasonal_freq=None, trend=None,
+                           grid_search=False, path_to_model=None, var_name='Value', plots_save_path=None,
+                           verbose=False):
     """Detect outliers in the given time series by comparing points against an ARIMA forecast, then plot the outliers.
 
        Inputs:
@@ -58,6 +59,10 @@ def detect_arima_anomalies(dataset_path, train_size, order, seasonal_order=(), s
     print('Reading the dataset: ' + dataset_path)
     time_series = read_csv(dataset_path, header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 
+    # TODO: don't use just this chunk of data; delete me
+    split = int(len(time_series) * 0.15)
+    time_series = time_series[0:split]
+
     if verbose:
         # describe the loaded dataset
         print(time_series.head())
@@ -68,7 +73,7 @@ def detect_arima_anomalies(dataset_path, train_size, order, seasonal_order=(), s
     # Detect outliers
     time_series_with_outliers, outliers = detect_anomalies_with_arima(time_series, train_size=train_size, order=order,
                                                                       seasonal_order=seasonal_order,
-                                                                      seasonal_freq=seasonal_freq,
+                                                                      seasonal_freq=seasonal_freq, trend=trend,
                                                                       grid_search=grid_search,
                                                                       path_to_model=path_to_model, verbose=verbose,
                                                                       var_name=var_name)
@@ -102,7 +107,8 @@ if __name__ == "__main__":
 
     time_series_with_outliers = detect_arima_anomalies(dataset_path=dataset, train_size=0.66,
                                                        order=(12, 0, 0), seasonal_order=(0, 1, 0),
-                                                       seasonal_freq=2920, var_name=name, verbose=True)
+                                                       seasonal_freq=2920, trend=None, var_name=name, verbose=True,
+                                                       grid_search=False)
 
 else:
     print('Detect_ARIMA_Anomalies.py is being imported into another module\n')
