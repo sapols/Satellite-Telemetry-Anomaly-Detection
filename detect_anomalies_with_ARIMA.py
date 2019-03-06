@@ -20,8 +20,8 @@ __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
 
 
-def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=None, grid_search=False,
-                                path_to_model=None, verbose=False, var_name='Value'):
+def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=None, trend=None,
+                                grid_search=False, path_to_model=None, verbose=False, var_name='Value'):
     """Detect outliers in the time series data by comparing points against an ARIMA forecast.
 
        Inputs:
