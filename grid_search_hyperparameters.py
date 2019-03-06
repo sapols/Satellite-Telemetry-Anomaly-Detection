@@ -33,7 +33,7 @@ def evaluate_arima_model(X, arima_order):
     predictions = list()
     for t in range(len(test)):
         model = ARIMA(history, order=arima_order)
-        model_fit = model.fit(disp=0)  # TODO: pass in verbose and put this under "if verbose" for disp=1?
+        model_fit = model.fit(disp=1)  # TODO: pass in verbose and put this under "if verbose" for disp=1 else 0?
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         history.append(test[t])
@@ -52,7 +52,7 @@ def evaluate_sarima_model(X, sarima_order, sarima_seasonal_order):
     predictions = list()
     for t in range(len(test)):
         model = SARIMAX(history, order=sarima_order, seasonal_order=sarima_seasonal_order)
-        model_fit = model.fit(disp=0)  # TODO: pass in verbose and put this under "if verbose" for disp=1?
+        model_fit = model.fit(disp=1)  # TODO: pass in verbose and put this under "if verbose" for disp=1 else 0?
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         history.append(test[t])
@@ -133,6 +133,7 @@ def sarima_configs(seasonal=[0]):
     models = list()
     # define config lists
     # TODO: increase range of these lists? These are defaults from: https://machinelearningmastery.com/how-to-grid-search-sarima-model-hyperparameters-for-time-series-forecasting-in-python/
+    # TODO: log/binary searching? (doubling/halving while errors go down; think big jumps through U-shape until finding local minimum, then refining)
     p_params = [0, 1, 2]
     d_params = [0, 1]
     q_params = [0, 1, 2]
@@ -143,7 +144,7 @@ def sarima_configs(seasonal=[0]):
     # p_params = [0, 1]
     # d_params = [0]
     # q_params = [0]
-    # t_params = ['n']
+    # t_params = ['ct']
     # P_params = [0]
     # D_params = [0]
     # Q_params = [0]
@@ -225,7 +226,7 @@ def grid_search_arima_params(ts):
 
 
 def grid_search_sarima_params(ts, freq):
-    """Perform a grid search to return SARIMA hyperparameters (p,d,q)(P,D,Q,freq) for the given time series.
+    """Perform a grid search to return SARIMA hyperparameters (p,d,q)(P,D,Q,freq) and trend for the given time series.
        See: https://machinelearningmastery.com/how-to-grid-search-sarima-model-hyperparameters-for-time-series-forecasting-in-python/
 
        Inputs:
@@ -236,14 +237,15 @@ def grid_search_sarima_params(ts, freq):
            None
 
        Outputs:
-           order [tuple]: The order hyperparameters (p,d,q) for this SARIMA model.
+           order [tuple]:          The order hyperparameters (p,d,q) for this SARIMA model.
            seasonal_order [tuple]: The seasonal order hyperparameters (P,D,Q,freq) for this SARIMA model.
+           trend [str]:            The trend hyperparameter for this SARIMA model.
 
        Optional Outputs:
            None
 
        Example:
-           order, seasonal_order = grid_search_sarima_params(time_series, seasonal_freq)
+           order, seasonal_order, trend = grid_search_sarima_params(time_series, seasonal_freq)
        """
 
     #data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
@@ -253,7 +255,7 @@ def grid_search_sarima_params(ts, freq):
 
     scores = grid_search(data, cfg_list, train_size)
 
-    best_cfg = scores[0]
+    best_cfg = scores[0]  # TODO: always returning the best score doesn't lead to constant overfitting, does it?
 
     order_str = best_cfg[0][1:best_cfg[0].find(')')+1]
     order = make_tuple(order_str)
@@ -262,6 +264,6 @@ def grid_search_sarima_params(ts, freq):
     seasonal_order_str = seasonal_order_str[seasonal_order_str.find('('):seasonal_order_str.find(')')+1]
     seasonal_order = make_tuple(seasonal_order_str)
 
-    trend = ''  # TODO: get trend
+    trend = best_cfg[0][best_cfg[0].find('\'')+1:-2]
 
-    return order, seasonal_order  # TODO: return trend too
+    return order, seasonal_order, trend
