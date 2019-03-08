@@ -95,7 +95,13 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
         # load pre-trained model
         trained_model_fit = ARIMAResults.load(path_to_model)
     else:
+        current_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        print('Before fitting: ' + current_time)
+
         trained_model_fit = trained_model.fit(disp=1)
+
+        current_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        print('After fitting: ' + current_time)
         # save the just-trained model
         try:
             current_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
