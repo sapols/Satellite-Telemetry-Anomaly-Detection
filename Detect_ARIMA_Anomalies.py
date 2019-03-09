@@ -60,8 +60,8 @@ def detect_arima_anomalies(dataset_path, train_size, order, seasonal_order=(), s
     time_series = read_csv(dataset_path, header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 
     # TODO: don't use just this chunk of data; delete me
-    split = int(len(time_series) * 0.15)
-    time_series = time_series[0:split]
+    time_series = time_series.loc['2008':'2014']
+    time_series = time_series.resample('24H').mean()
 
     if verbose:
         # describe the loaded dataset
@@ -99,16 +99,17 @@ def detect_arima_anomalies(dataset_path, train_size, order, seasonal_order=(), s
 if __name__ == "__main__":
     print('Detect_ARIMA_Anomalies.py is being run directly\n')
 
-    ds_num = 0  # used to select dataset path and variable name together
+    ds_num = 2  # used to select dataset path and variable name together
 
     dataset = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
                'Data/WheelTemperature.csv', 'Data/WheelRPM.csv'][ds_num]
     name = ['Voltage (V)', 'Current (A)', 'Temperature (C)', 'Temperature (C)', 'RPM'][ds_num]
 
     time_series_with_outliers = detect_arima_anomalies(dataset_path=dataset, train_size=0.66,
-                                                       order=(12, 0, 0), seasonal_order=(0, 1, 0),
-                                                       seasonal_freq=2920, trend=None, var_name=name, verbose=True,
-                                                       grid_search=False)
+                                                       order=(2, 0, 0), seasonal_order=(0, 1, 0),
+                                                       seasonal_freq=365, trend=None, var_name=name, verbose=True,
+                                                       grid_search=False,
+                                                       path_to_model='Models/SARIMA_(2, 0, 0)_(0, 1, 0, 365)_2019-03-08T16-41-46.pkl')
 
 else:
     print('Detect_ARIMA_Anomalies.py is being imported into another module\n')

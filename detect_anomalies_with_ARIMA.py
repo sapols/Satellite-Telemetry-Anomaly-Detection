@@ -2,6 +2,7 @@
 import os
 import datetime
 import pandas as pd
+from pandas import datetime
 import numpy as np
 from matplotlib import pyplot
 from statsmodels.tsa.arima_model import ARIMA
@@ -93,18 +94,19 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
 
     if path_to_model is not None:
         # load pre-trained model
+        print('Loading model: ' + path_to_model)
         trained_model_fit = ARIMAResults.load(path_to_model)
     else:
         current_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        print('Before fitting: ' + current_time)
+        print('Before fitting: ' + current_time + '\n')
 
         trained_model_fit = trained_model.fit(disp=1)
 
         current_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        print('After fitting: ' + current_time)
+        print('After fitting: ' + current_time + '\n')
         # save the just-trained model
         try:
-            current_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            current_time = str(datetime.now().strftime("%Y-%m-%dT%H-%M-%S"))
             filename = 'SARIMA_' + str(order) + '_' + str(seasonal_order) + '_' + current_time + '.pkl'
             model_dir = 'Models/'
             if not os.path.exists(model_dir):
@@ -124,7 +126,6 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
         pyplot.show()
         residuals.plot(kind='kde', title='Training Model Fit Residual Error Density')
         pyplot.show()
-        print(residuals.describe())
         print('\n')
 
     # Forecast with the trained ARIMA/SARIMA model
@@ -136,35 +137,41 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
     time_series_with_outliers['Outlier'] = 'False'
 
     # Label outliers using the forecast
-    for t in range(len(test)):
-        obs = test[t]
-        yhat = predictions_with_dates[test.index[t]]
+    for t in range(len(X) - 1):
+        obs = X[t + 1]
+        yhat = predictions_with_dates[X.index[t + 1]]
         if verbose:
             print('predicted=%f, expected=%f' % (yhat, obs))
         if abs(yhat - obs) > threshold:
-            time_series_with_outliers.at[ts.index[t], 'Outlier'] = 'True'
-            outlier = pd.Series(obs, index=[test.index[t]])
+            time_series_with_outliers.at[ts.index[t + 1], 'Outlier'] = 'True'
+            outlier = pd.Series(obs, index=[X.index[t + 1]])
             outliers = outliers.append(outlier)
 
     try:
         # TODO: use RMSE instead of MSE?
         model_error = mean_squared_error(X[1:len(X)], predictions_with_dates)
-        test_error = mean_squared_error(test, predictions_with_dates[test.index[0]:test.index[-1]])
-        print('Test MSE: %.3f' % test_error)
         print('MSE: %.3f' % model_error)
+        if len(test) > 0:
+            test_error = mean_squared_error(test, predictions_with_dates[test.index[0]:test.index[-1]])
+            print('Test MSE: %.3f' % test_error)
     except Exception as e:
         print('Forecast error calculation failed:')
         print(e)
 
     # Plot the forecast and outliers
     # TODO: move this under "if verbose"
-    X.plot(color='black', title='Time Series with Forecast and Outliers')
-    test.plot(color='blue')
-    predictions_with_dates.plot(color='green')
+    X.plot(color='black', title='Time Series with Forecast and Outliers', label=var_name)
+    if len(test) > 0:
+        test.plot(color='blue', label='Test Data')
+    predictions_with_dates.plot(color='green', label='Model Forecast')
     if len(outliers) > 0:
         print('Detected outliers: ' + str(len(outliers)) + '\n')
-        outliers.plot(color='red', style='.')
+        outliers.plot(color='red', style='.', label='Outliers')
     pyplot.legend(loc='best')
     pyplot.show()
 
-    return time_series_with_outliers, outliers
+    if seasonal_freq is not None:
+        # Remove the data points that were differenced away in the SARIMA forecast
+        return time_series_with_outliers[seasonal_freq:], outliers.loc[ts.index[seasonal_freq]:]
+    else:
+        return time_series_with_outliers, outliers
