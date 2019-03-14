@@ -166,7 +166,8 @@ def sarima_forecast_and_score(training, validation, config):
     seasonal_order = config[1]
     trend = config[2]
 
-    trained_model = SARIMAX(training, order=order, seasonal_order=seasonal_order, trend=trend)
+    trained_model = SARIMAX(training, order=order, seasonal_order=seasonal_order, trend=trend, enforce_stationarity=False, enforce_invertibility=False)
+    print('Training with configs: ' + str(config))
     trained_model_fit = trained_model.fit(disp=1)
 
     predictions = trained_model_fit.predict(start=1, end=len(X)-1, typ='levels')
@@ -248,13 +249,19 @@ def grid_search_sarima_params(ts, freq):
 
     #trivial_data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 90.0, 80.0, 70.0, 60.0, 50.0, 40.0, 30.0, 20.0]
     data = ts.values
-    holdout_size = 0.2
+    holdout_size = 0.5  # TODO: was 0.2
     split = int(len(data) * holdout_size)
     holdout_data = data[0:split]
 
     possible_order_configs = generate_sarima_configs([freq])
 
     configs_with_scores = get_cross_validation_scores(holdout_data, possible_order_configs)  # get cross validation scores for each order_config
+
+    # TODO: don't print this?
+    print('\n' + '----------------------------------GRID SEARCHING COMPLETE------------------------------------------')
+    print('RESULTS:' + '\n')
+    for config_and_score in configs_with_scores:
+        print(str(config_and_score))
 
     best_order_config = configs_with_scores[0][0]  # TODO: always returning the best score doesn't lead to constant overfitting, does it?
 
