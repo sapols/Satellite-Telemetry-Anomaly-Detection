@@ -1,6 +1,7 @@
 # Standard modules
 import os
 import datetime
+from math import sqrt
 import pandas as pd
 from pandas import datetime
 import numpy as np
@@ -148,9 +149,8 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
             outliers = outliers.append(outlier)
 
     try:
-        # TODO: use RMSE instead of MSE?
-        model_error = mean_squared_error(X[1:len(X)], predictions_with_dates)
-        print('MSE: %.3f' % model_error)
+        model_error = sqrt(mean_squared_error(X[1:len(X)], predictions_with_dates))
+        print('RMSE: %.3f' % model_error)
         if len(test) > 0:
             test_error = mean_squared_error(test, predictions_with_dates[test.index[0]:test.index[-1]])
             print('Test MSE: %.3f' % test_error)
