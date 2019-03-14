@@ -160,7 +160,11 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
 
     # Plot the forecast and outliers
     # TODO: move this under "if verbose"
-    X.plot(color='black', title='Time Series with Forecast and Outliers', label=var_name)
+    if len(seasonal_order) < 4:  # ARIMA title
+        title_text = 'Time Series with ' + str(order) + ' Forecast and Outliers'
+    else:  # SARIMA title
+        title_text = 'Time Series with ' + str(order) + '_' + str(seasonal_order) + '_' + str(trend) + ' Forecast and Outliers'
+    X.plot(color='black', title=title_text, label=var_name)
     if len(test) > 0:
         test.plot(color='blue', label='Test Data')
     predictions_with_dates.plot(color='green', label='Model Forecast')
