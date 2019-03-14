@@ -16,6 +16,8 @@ from warnings import catch_warnings
 from warnings import filterwarnings
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import mean_squared_error
+from matplotlib import pyplot
+import statistics
 
 __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
@@ -42,94 +44,13 @@ def evaluate_arima_model(X, arima_order):
     return error
 
 
-# Evaluate an SARIMA model for a given order (p,d,q)(P,D,Q,freq)
-def evaluate_sarima_model(X, sarima_order, sarima_seasonal_order):
-    # prepare training dataset
-    train_size = int(len(X) * 0.66)  # TODO: specify size instead of hardcoding 0.66?
-    train, test = X[0:train_size], X[train_size:]
-    history = [x for x in train]
-    # make predictions
-    predictions = list()
-    for t in range(len(test)):
-        model = SARIMAX(history, order=sarima_order, seasonal_order=sarima_seasonal_order)
-        model_fit = model.fit(disp=1)  # TODO: pass in verbose and put this under "if verbose" for disp=1 else 0?
-        yhat = model_fit.forecast()[0]
-        predictions.append(yhat)
-        history.append(test[t])
-    # calculate out of sample error
-    error = mean_squared_error(test, predictions)
-    return error
-
-
-# one-step sarima forecast
-def sarima_forecast(history, config):
-    order, sorder, trend = config
-    # define model
-    model = SARIMAX(history, order=order, seasonal_order=sorder, trend=trend, enforce_stationarity=False,
-                    enforce_invertibility=False)
-    # fit model
-    model_fit = model.fit(disp=False)
-    # make one step forecast
-    yhat = model_fit.predict(len(history), len(history))
-    return yhat[0]
-
-
-# split a univariate dataset into train/test sets
-def train_test_split(data, train_size):
-    split = int(len(data) * train_size)
-    return data[0:split], data[split:len(data)]
-
-
 # root mean squared error or rmse
-def measure_rmse(actual, predicted):
-    return sqrt(mean_squared_error(actual, predicted))
-
-
-# walk-forward validation for univariate data
-def walk_forward_validation(data, train_size, cfg):  #TODO: make this 5-fold cross validation?
-    predictions = list()
-    # split dataset
-    train, test = train_test_split(data, train_size)
-    # seed history with training dataset
-    history = [x for x in train]
-    # step over each time-step in the test set
-    for i in range(len(test)):
-        # fit model and make forecast for history
-        yhat = sarima_forecast(history, cfg)
-        # store forecast in list of predictions
-        predictions.append(yhat)
-        # add actual observation to history for the next loop
-        history.append(test[i])
-    # estimate prediction error
-    error = measure_rmse(test, predictions)
-    return error
-
-
-# score a model, return None on failure
-def score_model(data, train_size, cfg, debug=False):
-    result = None
-    # convert config to a key
-    key = str(cfg)
-    # show all warnings and fail on exception if debugging
-    if debug:
-        result = walk_forward_validation(data, train_size, cfg)
-    else:
-        # one failure during model validation suggests an unstable config
-        try:
-            # never show warnings when grid searching, too noisy
-            with catch_warnings():
-                filterwarnings("ignore")
-                result = walk_forward_validation(data, train_size, cfg)
-        except:
-            error = None
-    # check for an interesting result
-    if result is not None:
-        print(' > Model[%s] %.3f' % (key, result))
-    return (key, result)
+# def measure_rmse(actual, predicted): #TODO: don't use this unnecessary func
+#     return sqrt(mean_squared_error(actual, predicted))
 
 
 # create a set of sarima configs to try
-def sarima_configs(seasonal=[0]):
+def generate_sarima_configs(seasonal=[0]):
     models = list()
     # define config lists
     # TODO: increase range of these lists? These are defaults from: https://machinelearningmastery.com/how-to-grid-search-sarima-model-hyperparameters-for-time-series-forecasting-in-python/
@@ -141,15 +62,8 @@ def sarima_configs(seasonal=[0]):
     P_params = [0, 1, 2]
     D_params = [0, 1]
     Q_params = [0, 1, 2]
-    # p_params = [0, 1]
-    # d_params = [0]
-    # q_params = [0]
-    # t_params = ['ct']
-    # P_params = [0]
-    # D_params = [0]
-    # Q_params = [0]
     freq_params = seasonal
-    # create config instances
+    # create config instances (1,296 of them in total, but many will error and will get discarded)
     for p in p_params:
         for d in d_params:
             for q in q_params:
@@ -164,20 +78,104 @@ def sarima_configs(seasonal=[0]):
 
 
 # grid search configs
-def grid_search(data, cfg_list, train_size, parallel=True):
-    scores = None
+def get_cross_validation_scores(data, order_configs, parallel=False):  # TODO: parallel should be True
+    configs_with_scores = None
     if parallel:
         # execute configs in parallel
         executor = Parallel(n_jobs=cpu_count(), backend='multiprocessing')
-        tasks = (delayed(score_model)(data, train_size, cfg) for cfg in cfg_list)
-        scores = executor(tasks)
+        tasks = (delayed(score_model)(data, config) for config in order_configs)
+        configs_with_scores = executor(tasks)
     else:
-        scores = [score_model(data, train_size, cfg) for cfg in cfg_list]
+        configs_with_scores = [score_model(data, config) for config in order_configs]
+
     # remove empty results
-    scores = [r for r in scores if r[1] != None]
+    configs_with_scores = [r for r in configs_with_scores if (r[1] is not None and len(r[1])>0)]
     # sort configs by error, asc
-    scores.sort(key=lambda tup: tup[1])
-    return scores
+    configs_with_scores.sort(key=lambda tup: float(statistics.mean(tup[1])))
+    return configs_with_scores
+
+
+# score a model, return None on failure
+def score_model(data, config, debug=False):
+    rmses = []
+
+    # show all warnings and fail on exception if debugging
+    if debug:
+        rmses = nested_cross_validation(data, config)
+    else:
+        # one failure during model validation suggests an unstable config
+        try:
+            # never show warnings when grid searching, too noisy
+            with catch_warnings():
+                filterwarnings("ignore")
+                rmses = nested_cross_validation(data, config)
+        except Exception as e:
+            print(e)
+            error = None
+    # check for an interesting result
+    if len(rmses) > 0:
+        print(' > Model[%s] %s' % (str(config), str(rmses))) # TODO: "if verbose" or don't print
+    return (config, rmses)
+
+
+def nested_cross_validation(data, config, n_folds=5):
+    # Split the data into n_folds+1 chunks
+    data = pd.Series(data)
+    # data.plot(color='blue', title='Holdout Data (before splitting into folds)') # TODO: delete me
+    # pyplot.show()
+    folds = []
+    fold_size = len(data) / (n_folds+1)
+    for i in range(n_folds+1):  # 0 through 5 when n_folds=5
+        if i == n_folds:
+            folds.append(pd.Series(data[i*fold_size:]))  # last fold gets any off-by-one remainder point
+        else:
+            folds.append(pd.Series(data[i*fold_size:(i*fold_size)+fold_size]))
+
+    # I can trust that this logic splits the data into perfect folds
+    # data.plot(color='black', title='Holdout Data (after splitting into folds)')  # TODO: delete me
+    # folds[0].plot(color='blue')
+    # folds[1].plot(color='green')
+    # folds[2].plot(color='red')
+    # folds[3].plot(color='purple')
+    # folds[4].plot(color='orange')
+    # folds[5].plot(color='pink')
+    # pyplot.show()
+
+    RMSEs = train_and_validate(folds, config)
+    return RMSEs
+
+
+def train_and_validate(folds, config):
+    num_folds = len(folds)
+    RMSEs = []
+
+    for i in range(num_folds-1):  # 0 through 5 when num_folds=6
+        num_training_folds = i+1
+        training_folds = folds[:num_training_folds]
+        training_data = pd.Series([])
+        training_data = training_data.append(training_folds, verify_integrity=True)
+        validation_data = folds[i+1]
+        RMSEs.append(sarima_forecast_and_score(training_data, validation_data, config))
+
+    return RMSEs
+
+
+def sarima_forecast_and_score(training, validation, config):
+    X = training.append(validation, verify_integrity=True)
+    order = config[0]
+    seasonal_order = config[1]
+    trend = config[2]
+
+    trained_model = SARIMAX(training, order=order, seasonal_order=seasonal_order, trend=trend)
+    trained_model_fit = trained_model.fit(disp=1)
+
+    predictions = trained_model_fit.predict(start=1, end=len(X)-1, typ='levels')
+    predict_index = pd.Index(X.index[1:len(X)])
+    predictions_with_index = pd.Series(predictions.values, index=predict_index)
+
+    model_rmse = sqrt(mean_squared_error(X[1:len(X)], predictions_with_index))
+    return model_rmse
+
 
 
 #----Grid Search Functions----------------------------------------------------------------------------------------------
@@ -248,22 +246,21 @@ def grid_search_sarima_params(ts, freq):
            order, seasonal_order, trend = grid_search_sarima_params(time_series, seasonal_freq)
        """
 
-    #data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
-    data = ts.values
-    train_size = 0.66  # TODO: specify size instead of hardcoding 0.66?
-    cfg_list = sarima_configs([freq])
+    trivial_data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 90.0, 80.0, 70.0, 60.0, 50.0, 40.0, 30.0, 20.0]
+    # data = ts.values
+    # holdout_size = 0.2
+    # split = int(len(data) * holdout_size)
+    # holdout_data = data[0:split]
 
-    scores = grid_search(data, cfg_list, train_size)
+    possible_order_configs = generate_sarima_configs([freq])
 
-    best_cfg = scores[0]  # TODO: always returning the best score doesn't lead to constant overfitting, does it?
+    configs_with_scores = get_cross_validation_scores(trivial_data, possible_order_configs)  # get cross validation scores for each order_config
 
-    order_str = best_cfg[0][1:best_cfg[0].find(')')+1]
-    order = make_tuple(order_str)
+    best_order_config = configs_with_scores[0][0]  # TODO: always returning the best score doesn't lead to constant overfitting, does it?
 
-    seasonal_order_str = best_cfg[0][1+len(order_str):]
-    seasonal_order_str = seasonal_order_str[seasonal_order_str.find('('):seasonal_order_str.find(')')+1]
-    seasonal_order = make_tuple(seasonal_order_str)
-
-    trend = best_cfg[0][best_cfg[0].find('\'')+1:-2]
+    order = best_order_config[0]
+    seasonal_order = best_order_config[1]
+    trend = best_order_config[2]
 
     return order, seasonal_order, trend
+
