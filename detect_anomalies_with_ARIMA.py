@@ -141,8 +141,8 @@ def detect_anomalies_with_arima(ts, train_size, order, seasonal_order=(), season
     for t in range(len(X) - 1):
         obs = X[t + 1]
         yhat = predictions_with_dates[X.index[t + 1]]
-        if verbose:
-            print('predicted=%f, expected=%f' % (yhat, obs))
+        # if verbose:
+        #     print('predicted=%f, expected=%f' % (yhat, obs))
         if abs(yhat - obs) > threshold:
             time_series_with_outliers.at[ts.index[t + 1], 'Outlier'] = 'True'
             outlier = pd.Series(obs, index=[X.index[t + 1]])
