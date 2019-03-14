@@ -78,7 +78,7 @@ def generate_sarima_configs(seasonal=[0]):
 
 
 # grid search configs
-def get_cross_validation_scores(data, order_configs, parallel=False):  # TODO: parallel should be True
+def get_cross_validation_scores(data, order_configs, parallel=False):  # TODO: parallel should be True, but it always crashes
     configs_with_scores = None
     if parallel:
         # execute configs in parallel
@@ -246,15 +246,15 @@ def grid_search_sarima_params(ts, freq):
            order, seasonal_order, trend = grid_search_sarima_params(time_series, seasonal_freq)
        """
 
-    trivial_data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 90.0, 80.0, 70.0, 60.0, 50.0, 40.0, 30.0, 20.0]
-    # data = ts.values
-    # holdout_size = 0.2
-    # split = int(len(data) * holdout_size)
-    # holdout_data = data[0:split]
+    #trivial_data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 90.0, 80.0, 70.0, 60.0, 50.0, 40.0, 30.0, 20.0]
+    data = ts.values
+    holdout_size = 0.2
+    split = int(len(data) * holdout_size)
+    holdout_data = data[0:split]
 
     possible_order_configs = generate_sarima_configs([freq])
 
-    configs_with_scores = get_cross_validation_scores(trivial_data, possible_order_configs)  # get cross validation scores for each order_config
+    configs_with_scores = get_cross_validation_scores(holdout_data, possible_order_configs)  # get cross validation scores for each order_config
 
     best_order_config = configs_with_scores[0][0]  # TODO: always returning the best score doesn't lead to constant overfitting, does it?
 
