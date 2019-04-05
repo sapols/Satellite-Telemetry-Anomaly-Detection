@@ -54,6 +54,7 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
         time_series_with_outliers['Outlier'] = 'False'
 
         if verbose:
+            # TODO: finalize coloring
             pyplot.plot(ts, color='blue', label='Time Series')
             pyplot.plot(rolling_mean, color='black', label='Rolling Mean')
             pyplot.legend(loc='best')

@@ -81,17 +81,22 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
         time_series_with_outliers, outliers = detect_anomalies_with_mean(time_series, num_stds, verbose)
 
     # Plot the outliers
-    time_series.plot(color='blue', title=dataset_path.split('/')[-1] + ' Dataset with Outliers')
+    # TODO: finalize coloring
+    time_series.plot(color='black', title=dataset_path.split('/')[-1] + ' Dataset with Outliers', label=var_name)
     pyplot.xlabel('Time')
     pyplot.ylabel(var_name)
     if len(outliers) > 0:
         print('\nDetected Outliers: ' + str(len(outliers)) + "\n")
-        outliers.plot(color='red', style='.')
+        outliers.plot(color='red', style='.', label='Outliers')
     # if len(errors) > 0:
     #     errors.plot(color='orange')
     try:
         if len(predictions) > 0:
-            predictions.plot(color='black')
+            if use_rolling_mean == True:
+                mean_label = 'Rolling Mean'
+            else:
+                mean_label = 'Mean'
+            predictions.plot(color='blue', label=mean_label)
     except:
         pass
     if plots_save_path:
@@ -100,6 +105,7 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
         current_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         filename = plots_save_path + dataset_path.split('/')[-1] + ' with Outliers (' + current_time + ').png'
         pyplot.savefig(filename, dpi=500)
+    pyplot.legend(loc='best')
     pyplot.show()
 
     return time_series_with_outliers
@@ -108,14 +114,14 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
 if __name__ == "__main__":
     print('Detect_Standard_Deviation_Anomalies.py is being run directly\n')
 
-    ds_num = 0  # used to select dataset path and variable name together
+    ds_num = 1  # used to select dataset path and variable name together
 
     dataset = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
                'Data/WheelTemperature.csv', 'Data/WheelRPM.csv'][ds_num]
     name = ['Voltage (V)', 'Current (A)', 'Temperature (C)', 'Temperature (C)', 'RPM'][ds_num]
 
     time_series_with_outliers = detect_standard_deviation_anomalies(dataset_path=dataset, var_name=name, verbose=True,
-                                                                    use_rolling_mean=False, window=517, num_stds=2,
+                                                                    use_rolling_mean=True, window=53, num_stds=2,
                                                                     outlier_def='errors')
 
 else:
