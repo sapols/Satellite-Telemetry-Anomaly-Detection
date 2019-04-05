@@ -89,8 +89,11 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
         outliers.plot(color='red', style='.')
     # if len(errors) > 0:
     #     errors.plot(color='orange')
-    if len(predictions) > 0:
-        predictions.plot(color='black')
+    try:
+        if len(predictions) > 0:
+            predictions.plot(color='black')
+    except:
+        pass
     if plots_save_path:
         if not os.path.exists(plots_save_path):
             os.makedirs(plots_save_path)
@@ -112,7 +115,7 @@ if __name__ == "__main__":
     name = ['Voltage (V)', 'Current (A)', 'Temperature (C)', 'Temperature (C)', 'RPM'][ds_num]
 
     time_series_with_outliers = detect_standard_deviation_anomalies(dataset_path=dataset, var_name=name, verbose=True,
-                                                                    use_rolling_mean=True, window=517, num_stds=2,
+                                                                    use_rolling_mean=False, window=517, num_stds=2,
                                                                     outlier_def='errors')
 
 else:
