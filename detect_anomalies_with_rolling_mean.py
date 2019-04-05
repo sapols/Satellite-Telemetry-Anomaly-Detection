@@ -26,14 +26,15 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
 
        Outputs:
            time_series_with_outliers [pd DataFrame]: A pandas DataFrame with a DatetimeIndex, a columns for numerical values, and an Outlier column (True or False).
-           outliers [pd Series]: The detected outliers, as a pandas Series with a DatetimeIndex and a column for the outlier value.
-           errors [pd Series]: The errors at each point, as a pandas Series with a DatetimeIndex and a column for the errors.
+           predictions [pd Series]:                 The rolling mean, as a pandas Series with a DatetimeIndex and a column for the rolling mean.
+           outliers [pd Series]:                    The detected outliers, as a pandas Series with a DatetimeIndex and a column for the outlier value.
+           errors [pd Series]:                      The errors at each point, as a pandas Series with a DatetimeIndex and a column for the errors.
 
        Optional Outputs:
            None
 
        Example:
-           time_series_with_outliers, outliers, errors = detect_anomalies_with_rolling_mean(time_series, 2, window, False)
+           time_series_with_outliers, predictions, outliers, errors = detect_anomalies_with_rolling_mean(time_series, 2, window, False)
     """
 
     if window <= 0:
@@ -46,6 +47,7 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
             rolling_mean[i] = first_window_mean
         std = float(ts.values.std(ddof=0))
         X = ts.values
+        predictions = pd.Series(rolling_mean, index=ts.index)
         outliers = pd.Series()
         errors = pd.Series()
         time_series_with_outliers = pd.DataFrame({var_name: ts})
@@ -104,4 +106,4 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
                     outliers = outliers.append(outlier)
                 progress_bar_sliding_window.update(t)  # advance progress bar
 
-        return time_series_with_outliers, outliers, errors
+        return time_series_with_outliers, predictions, outliers, errors

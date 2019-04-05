@@ -76,7 +76,7 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
         pyplot.show()
 
     if use_rolling_mean:
-        time_series_with_outliers, outliers, errors = detect_anomalies_with_rolling_mean(time_series, num_stds, window, verbose, outlier_def=outlier_def)
+        time_series_with_outliers, predictions, outliers, errors = detect_anomalies_with_rolling_mean(time_series, num_stds, window, verbose, outlier_def=outlier_def)
     else:
         time_series_with_outliers, outliers = detect_anomalies_with_mean(time_series, num_stds, verbose)
 
@@ -89,6 +89,8 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
         outliers.plot(color='red', style='.')
     # if len(errors) > 0:
     #     errors.plot(color='orange')
+    if len(predictions) > 0:
+        predictions.plot(color='black')
     if plots_save_path:
         if not os.path.exists(plots_save_path):
             os.makedirs(plots_save_path)
