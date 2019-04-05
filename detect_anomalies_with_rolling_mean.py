@@ -8,7 +8,7 @@ __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
 
 
-def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='Value'):
+def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='Value', outlier_def='std'):
     """Detect outliers in the time series data by comparing points against [num_stds] standard deviations from a rolling mean.
 
        Inputs:
@@ -18,18 +18,22 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
            verbose [bool]:   When True, a plot of the rolling mean will be displayed before outliers are detected.
 
        Optional Inputs:
-           var_name [str]: The name of the dependent variable in the time series.
-                           Default is 'Value'.
+           var_name [str]:    The name of the dependent variable in the time series.
+                              Default is 'Value'.
+           outlier_def [str]: {'std', 'errors'} The definition of an outlier to be used. Can be 'std' for [num_stds] from the data's mean,
+                              or 'errors' for [num_stds] from the mean of the errors.
+                              Default is 'std'.
 
        Outputs:
            time_series_with_outliers [pd DataFrame]: A pandas DataFrame with a DatetimeIndex, a columns for numerical values, and an Outlier column (True or False).
            outliers [pd Series]: The detected outliers, as a pandas Series with a DatetimeIndex and a column for the outlier value.
+           errors [pd Series]: The errors at each point, as a pandas Series with a DatetimeIndex and a column for the errors.
 
        Optional Outputs:
            None
 
        Example:
-           time_series_with_outliers, outliers = detect_anomalies_with_rolling_mean(time_series, 2, window, False)
+           time_series_with_outliers, outliers, errors = detect_anomalies_with_rolling_mean(time_series, 2, window, False)
     """
 
     if window <= 0:
@@ -43,6 +47,7 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
         std = float(ts.values.std(ddof=0))
         X = ts.values
         outliers = pd.Series()
+        errors = pd.Series()
         time_series_with_outliers = pd.DataFrame({var_name: ts})
         time_series_with_outliers['Outlier'] = 'False'
 
@@ -59,14 +64,44 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
             widgets=[progressbar.FormatLabel('Time Series Outliers ')] + widgets,
             max_value=int(len(X))).start()
 
-        # Label outliers using standard deviation
-        for t in range(len(X)):
-            obs = X[t]
-            y = rolling_mean[t]
-            if abs(y-obs) > std*num_stds:
-                time_series_with_outliers.at[ts.index[t], 'Outlier'] = 'True'
-                outlier = pd.Series(obs, index=[ts.index[t]])
-                outliers = outliers.append(outlier)
-            progress_bar_sliding_window.update(t)  # advance progress bar
+        if outlier_def == 'std':
+            # Label outliers using standard deviations
+            for t in range(len(X)):
+                obs = X[t]
+                y = rolling_mean[t]
+                error = abs(y-obs)
+                error_point = pd.Series(error, index=[ts.index[t]])
+                errors = errors.append(error_point)
+                if error > std*num_stds:
+                    time_series_with_outliers.at[ts.index[t], 'Outlier'] = 'True'
+                    outlier = pd.Series(obs, index=[ts.index[t]])
+                    outliers = outliers.append(outlier)
+                progress_bar_sliding_window.update(t)  # advance progress bar
 
-        return time_series_with_outliers, outliers
+        elif outlier_def == 'errors':
+            # Populate errors
+            for t in range(len(X)):
+                obs = X[t]
+                y = rolling_mean[t]
+                error = abs(y - obs)
+                error_point = pd.Series(error, index=[ts.index[t]])
+                errors = errors.append(error_point)
+
+                progress_bar_sliding_window.update(t)  # advance progress bar
+
+            mean_of_errors = float(errors.values.mean())
+            std_of_errors = float(errors.values.std(ddof=0))
+            threshold = mean_of_errors + (std_of_errors*num_stds)
+
+            # Label outliers using standard deviations from the errors' mean
+            for t in range(len(X)):
+                obs = X[t]
+                y = rolling_mean[t]
+                error = errors[t]
+                if error > threshold:
+                    time_series_with_outliers.at[ts.index[t], 'Outlier'] = 'True'
+                    outlier = pd.Series(obs, index=[ts.index[t]])
+                    outliers = outliers.append(outlier)
+                progress_bar_sliding_window.update(t)  # advance progress bar
+
+        return time_series_with_outliers, outliers, errors

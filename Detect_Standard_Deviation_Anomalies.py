@@ -25,7 +25,8 @@ def parser(x):
 
 
 def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_save_path=None,
-                                        verbose=False, use_rolling_mean=False, window=0, num_stds=2):
+                                        verbose=False, use_rolling_mean=False, window=0, num_stds=2,
+                                        outlier_def='std'):
     """Detect outliers in the time series data by one of the following methods:
        1) comparing points against [num_stds] standard deviations from the dataset mean
        2) comparing points against [num_stds] standard deviations from a rolling mean with a specified window
@@ -44,6 +45,9 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
                                     Default is False.
            window [int]:            Window size; the number of samples to include in a rolling mean.
            num_stds [float]:        The number of standard deviations away from the mean used to define point outliers.
+           outlier_def [str]:       {'std', 'errors'} The definition of an outlier to be used. Can be 'std' for [num_stds] from the data's mean,
+                                    or 'errors' for [num_stds] from the mean of the errors.
+                                    Default is 'std'.
 
        Outputs:
            time_series_with_outliers [pd DataFrame]: A pandas DataFrame with a DatetimeIndex, a columns for numerical values, and an Outlier column (True or False).
@@ -60,6 +64,7 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
     # Load the dataset
     print('Reading the dataset: ' + dataset_path)
     print('Using rolling mean? ' + str(use_rolling_mean))
+    print('Outlier definition: ' + outlier_def)
     print('Standard deviations for point outliers: ' + str(num_stds))
     time_series = read_csv(dataset_path, header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 
@@ -71,7 +76,7 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
         pyplot.show()
 
     if use_rolling_mean:
-        time_series_with_outliers, outliers = detect_anomalies_with_rolling_mean(time_series, num_stds, window, verbose)
+        time_series_with_outliers, outliers, errors = detect_anomalies_with_rolling_mean(time_series, num_stds, window, verbose, outlier_def=outlier_def)
     else:
         time_series_with_outliers, outliers = detect_anomalies_with_mean(time_series, num_stds, verbose)
 
@@ -82,6 +87,8 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
     if len(outliers) > 0:
         print('\nDetected Outliers: ' + str(len(outliers)) + "\n")
         outliers.plot(color='red', style='.')
+    # if len(errors) > 0:
+    #     errors.plot(color='orange')
     if plots_save_path:
         if not os.path.exists(plots_save_path):
             os.makedirs(plots_save_path)
@@ -96,14 +103,15 @@ def detect_standard_deviation_anomalies(dataset_path, var_name='Value', plots_sa
 if __name__ == "__main__":
     print('Detect_Standard_Deviation_Anomalies.py is being run directly\n')
 
-    ds_num = 3  # used to select dataset path and variable name together
+    ds_num = 0  # used to select dataset path and variable name together
 
     dataset = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
                'Data/WheelTemperature.csv', 'Data/WheelRPM.csv'][ds_num]
     name = ['Voltage (V)', 'Current (A)', 'Temperature (C)', 'Temperature (C)', 'RPM'][ds_num]
 
     time_series_with_outliers = detect_standard_deviation_anomalies(dataset_path=dataset, var_name=name, verbose=True,
-                                                                    use_rolling_mean=True, window=10000, num_stds=2)
+                                                                    use_rolling_mean=True, window=517, num_stds=2,
+                                                                    outlier_def='errors')
 
 else:
     print('Detect_Standard_Deviation_Anomalies.py is being imported into another module\n')
