@@ -4,6 +4,9 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot
 
+# Custom modules
+import nonparametric_dynamic_thresholding as ndt
+
 __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
 
@@ -20,8 +23,8 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
        Optional Inputs:
            var_name [str]:    The name of the dependent variable in the time series.
                               Default is 'Value'.
-           outlier_def [str]: {'std', 'errors'} The definition of an outlier to be used. Can be 'std' for [num_stds] from the data's mean,
-                              or 'errors' for [num_stds] from the mean of the errors.
+           outlier_def [str]: {'std', 'errors', 'dynamic'} The definition of an outlier to be used. Can be 'std' for [num_stds] from the data's mean,
+                              'errors' for [num_stds] from the mean of the errors, or 'dynamic' for nonparametric dynamic thresholding
                               Default is 'std'.
 
        Outputs:
@@ -67,6 +70,7 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
             widgets=[progressbar.FormatLabel('Time Series Outliers ')] + widgets,
             max_value=int(len(X))).start()
 
+        # Define outliers by distance from rolling mean
         if outlier_def == 'std':
             # Label outliers using standard deviations
             for t in range(len(X)):
@@ -81,6 +85,7 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
                     outliers = outliers.append(outlier)
                 progress_bar_sliding_window.update(t)  # advance progress bar
 
+        # Define outliers by distance from mean of errors
         elif outlier_def == 'errors':
             # Populate errors
             for t in range(len(X)):
@@ -106,5 +111,21 @@ def detect_anomalies_with_rolling_mean(ts, num_stds, window, verbose, var_name='
                     outlier = pd.Series(obs, index=[ts.index[t]])
                     outliers = outliers.append(outlier)
                 progress_bar_sliding_window.update(t)  # advance progress bar
+
+        # Define outliers using JPL's nonparamatric dynamic thresholding technique
+        elif outlier_def == 'dynamic':
+            smoothed_errors = ndt.get_errors(X, rolling_mean.values)
+
+            # These are the results of the nonparametric dynamic thresholding
+            E_seq, anom_scores = ndt.process_errors(X, smoothed_errors)
+
+            # Convert sets of outlier start/end indices into outlier points
+            for anom in E_seq:
+                start = anom[0]
+                end = anom[1]
+                for i in range(start, end+1):
+                    outlier = pd.Series(X[i], index=[ts.index[i]])
+                    outliers = outliers.append(outlier)
+
 
         return time_series_with_outliers, predictions, outliers, errors
