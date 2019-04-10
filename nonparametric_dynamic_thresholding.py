@@ -71,17 +71,14 @@ def get_errors(y_test, y_hat, anom, smoothed=True):
     return e_s
 
 
-def process_errors(y_test, y_hat, e_s, anom, logger):
+def process_errors(y_test, e_s):
     '''Using windows of historical errors (h = batch size * window size), calculate the anomaly
     threshold (epsilon) and group any anomalous error values into continuos sequences. Calculate
     score for each sequence using the max distance from epsilon.
 
     Args:
         y_test (np array): test targets corresponding to true telemetry values at each timestep t
-        y_hat (np array): test target predictions at each timestep t
         e_s (list): smoothed errors (residuals) between y_test and y_hat
-        anom (dict): contains anomaly information for a given input stream
-        logger (obj): logging object
 
     Returns:
         E_seq (list of tuples): Start and end indices for each anomaloues sequence
@@ -89,7 +86,7 @@ def process_errors(y_test, y_hat, e_s, anom, logger):
     '''
 
     i_anom = []  # anomaly indices
-    window_size = window_size
+    window_size = 30  # TODO: don't hardcode this
 
     num_windows = int((y_test.shape[0] - (batch_size * window_size)) / batch_size)
 
@@ -285,7 +282,7 @@ def prune_anoms(E_seq, e_s, non_anom_max, i_anom):
         e_s_max.append(non_anom_max)  # for comparing the last actual anomaly to next highest below epsilon
 
     i_to_remove = []
-    p = p
+    p = 0.13  # TODO: don't hardcode this
 
     for i in range(0, len(e_s_max)):
         if i + 1 < len(e_s_max):
@@ -362,56 +359,57 @@ def get_anomalies(e_s, y_test, z, window, i_anom_full, len_y_test):
     return i_anom
 
 
-def evaluate_sequences(E_seq, anom):
-    '''Compare identified anomalous sequences with labeled anomalous sequences
-
-    Args:
-        E_seq (list of lists): contains start and end indices of anomalous ranges
-        anom (dict): contains anomaly information for a given input stream
-
-    Returns:
-        anom (dict): with updated anomaly information (whether identified, scores, etc.)
-    '''
-
-    anom["false_positives"] = 0
-    anom["false_negatives"] = 0
-    anom["true_positives"] = 0
-    anom["fp_sequences"] = []
-    anom["tp_sequences"] = []
-    anom["num_anoms"] = len(anom["anomaly_sequences"])
-
-    E_seq_test = eval(anom["anomaly_sequences"])
-
-    if len(E_seq) > 0:
-
-        matched_E_seq_test = []
-
-        for e_seq in E_seq:
-
-            valid = False
-
-            for i, a in enumerate(E_seq_test):
-
-                if (e_seq[0] >= a[0] and e_seq[0] <= a[1]) or (e_seq[1] >= a[0] and e_seq[1] <= a[1]) or \
-                        (e_seq[0] <= a[0] and e_seq[1] >= a[1]) or (a[0] <= e_seq[0] and a[1] >= e_seq[1]):
-
-                    anom["tp_sequences"].append(e_seq)
-
-                    valid = True
-
-                    if i not in matched_E_seq_test:
-                        anom["true_positives"] += 1
-                        matched_E_seq_test.append(i)
-
-            if valid == False:
-                anom["false_positives"] += 1
-                anom["fp_sequences"].append([e_seq[0], e_seq[1]])
-
-        anom["false_negatives"] += (len(E_seq_test) - len(matched_E_seq_test))
-
-    else:
-        anom["false_negatives"] += len(E_seq_test)
-
-    return anom
+# Not using because I don't have labeled anomalies
+# def evaluate_sequences(E_seq, anom):
+#     '''Compare identified anomalous sequences with labeled anomalous sequences
+#
+#     Args:
+#         E_seq (list of lists): contains start and end indices of anomalous ranges
+#         anom (dict): contains anomaly information for a given input stream
+#
+#     Returns:
+#         anom (dict): with updated anomaly information (whether identified, scores, etc.)
+#     '''
+#
+#     anom["false_positives"] = 0
+#     anom["false_negatives"] = 0
+#     anom["true_positives"] = 0
+#     anom["fp_sequences"] = []
+#     anom["tp_sequences"] = []
+#     anom["num_anoms"] = len(anom["anomaly_sequences"])
+#
+#     E_seq_test = eval(anom["anomaly_sequences"])
+#
+#     if len(E_seq) > 0:
+#
+#         matched_E_seq_test = []
+#
+#         for e_seq in E_seq:
+#
+#             valid = False
+#
+#             for i, a in enumerate(E_seq_test):
+#
+#                 if (e_seq[0] >= a[0] and e_seq[0] <= a[1]) or (e_seq[1] >= a[0] and e_seq[1] <= a[1]) or \
+#                         (e_seq[0] <= a[0] and e_seq[1] >= a[1]) or (a[0] <= e_seq[0] and a[1] >= e_seq[1]):
+#
+#                     anom["tp_sequences"].append(e_seq)
+#
+#                     valid = True
+#
+#                     if i not in matched_E_seq_test:
+#                         anom["true_positives"] += 1
+#                         matched_E_seq_test.append(i)
+#
+#             if valid == False:
+#                 anom["false_positives"] += 1
+#                 anom["fp_sequences"].append([e_seq[0], e_seq[1]])
+#
+#         anom["false_negatives"] += (len(E_seq_test) - len(matched_E_seq_test))
+#
+#     else:
+#         anom["false_negatives"] += len(E_seq_test)
+#
+#     return anom
 
 
