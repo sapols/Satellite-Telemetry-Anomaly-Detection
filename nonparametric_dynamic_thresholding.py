@@ -34,7 +34,7 @@ error_buffer = 100
 p = 0.13
 
 
-def get_errors(y_test, y_hat, anom, smoothed=True):
+def get_errors(y_test, y_hat, anom=None, smoothed=True):
     """Calculate the difference between predicted telemetry values and actual values, then smooth residuals using
     ewma to encourage identification of sustained errors/anomalies.
 
@@ -50,7 +50,8 @@ def get_errors(y_test, y_hat, anom, smoothed=True):
         e_s (list): smoothed errors (residuals)
     """
 
-    e = [abs(y_h - y_t[0]) for y_h, y_t in zip(y_hat, y_test)]
+    # e = [abs(y_h - y_t[0]) for y_h, y_t in zip(y_hat, y_test)]
+    e = [abs(y_h - y_t) for y_h, y_t in zip(y_hat, y_test)]
 
     if not smoothed:
         return e
@@ -63,7 +64,9 @@ def get_errors(y_test, y_hat, anom, smoothed=True):
     e_s = list(pd.DataFrame(e).ewm(span=smoothing_window).mean().values.flatten())
 
     # for values at beginning < sequence length, just use avg
-    if not anom['chan_id'] == 'C-2':  # anom occurs early in window (limited data available for channel)
+    if anom is None:
+        e_s[:l_s] = [np.mean(e_s[:l_s * 2])] * l_s
+    elif not anom['chan_id'] == 'C-2':  # anom occurs early in window (limited data available for channel)
         e_s[:l_s] = [np.mean(e_s[:l_s * 2])] * l_s
 
     # np.save(os.path.join("data", anom['run_id'], "smoothed_errors", anom["chan_id"] + ".npy"), np.array(e_s))
