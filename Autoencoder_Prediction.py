@@ -27,20 +27,47 @@ def parser(x):
         return datetime.strptime(new_time, '%Y-%m-%d')  # for total bus current data
 
 
+def shingle(ts, window_size=18):
+    remainder = len(ts) % window_size  # if ts isn't divisible by window_size, drop the first [remainder] data points
+
+    shingled_ts = np.array([ts.values[remainder:window_size+remainder]])
+    for i in range(window_size+remainder, len(ts), window_size):
+        shingle = []
+        for j in range(i, i+window_size):
+            shingle.append(ts.values[j])
+        shingled_ts = np.append(shingled_ts, [shingle], axis=0)
+
+    return shingled_ts
+
+
+def get_autoencoder_predictions(encoder, decoder, ts):
+    predictions = []
+
+    for i in range(len(ts)):
+        inputs = np.array([ts[i]])
+        x = encoder.predict(inputs)  # the compressed representation
+        y = decoder.predict(x)[0]    # the decoded output
+        predictions = predictions + y.tolist()
+
+    return predictions
+
+
 def seedy(s):
     np.random.seed(s)
     set_random_seed(s)
 
 
 class AutoEncoder:
-    def __init__(self, encoding_dim=3):
+    # TODO: with shingles of 18, the shape of this net is (18,10,18). Make it (18,150,75,10,75,150,18)
+    def __init__(self, data, encoding_dim=3):
         self.encoding_dim = encoding_dim
-        r = lambda: np.random.randint(1, 3)                       # TODO: nope
-        self.x = np.array([[r(), r(), r()] for _ in range(1000)]) # TODO: use time series instead of random values
+        # r = lambda: np.random.randint(1, 3)
+        # self.x = np.array([[r(), r(), r()] for _ in range(1000)])
+        self.x = data
         print(self.x)
 
     def _encoder(self):
-        inputs = Input(shape=(self.x[0].shape))
+        inputs = Input(shape=self.x[0].shape)
         encoded = Dense(self.encoding_dim, activation='relu')(inputs)
         model = Model(inputs, encoded)
         self.encoder = model
@@ -48,7 +75,8 @@ class AutoEncoder:
 
     def _decoder(self):
         inputs = Input(shape=(self.encoding_dim,))
-        decoded = Dense(3)(inputs)
+        num_outputs = self.x[0].shape[0]
+        decoded = Dense(num_outputs)(inputs)
         model = Model(inputs, decoded)
         self.decoder = model
         return model
@@ -116,6 +144,10 @@ def autoencoder_prediction(dataset_path, train_size, path_to_model=None, var_nam
     print('Reading the dataset: ' + dataset_path)
     time_series = read_csv(dataset_path, header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 
+    # Shingle the dataset
+    window_size = 18
+    shingled_ts = shingle(time_series, window_size)
+
     if verbose:
         # describe the loaded dataset
         print(time_series.head())
@@ -123,11 +155,10 @@ def autoencoder_prediction(dataset_path, train_size, path_to_model=None, var_nam
         time_series.plot(title=dataset_path + ' Dataset')
         pyplot.show()
 
-    predictions = pd.Series()
-    # predictions_with_dates = pd.Series(predictions.values, index=time_series.index)
+    predictions = []
 
     seedy(2)
-    ae = AutoEncoder(encoding_dim=2)
+    ae = AutoEncoder(shingled_ts, encoding_dim=10)
     ae.encoder_decoder()
     ae.fit(batch_size=50, epochs=300)
     ae.save()
@@ -135,16 +166,28 @@ def autoencoder_prediction(dataset_path, train_size, path_to_model=None, var_nam
     encoder = load_model(r'weights/encoder_weights.h5')
     decoder = load_model(r'weights/decoder_weights.h5')
 
-    inputs = np.array([[2, 1, 1]])
-    x = encoder.predict(inputs)
-    y = decoder.predict(x)
+    # print('\nDone fitting the autoencoder. Testing it with an arbitrary input:')
+    #
+    # #inputs = np.array([[2, 1, 1]])
+    # #inputs = np.array([[30, 31, 32, 30, 28, 31, 32, 34, 32, 32, 31, 31, 31, 30, 30, 15, 31, 31 ]])
+    # inputs = np.array([[2, 1, 100, 20, 50, 3, 3, 3, 3, 2, 3, 3, 3, 0, 30, 5, 31, 31]])
+    # x = encoder.predict(inputs)
+    # y = decoder.predict(x)
+    #
+    # print('Input: {}'.format(inputs))
+    # print('Encoded: {}'.format(x))
+    # print('Decoded: {}'.format(y))
+    #
+    # print('\nActually predicting the time series now.')
 
-    print('Input: {}'.format(inputs))
-    print('Encoded: {}'.format(x))
-    print('Decoded: {}'.format(y))
+    predictions = time_series.values[:len(time_series)%window_size].tolist()
 
-    #return time_series, predictions
-    return inputs, y
+    autoencoder_predictions = get_autoencoder_predictions(encoder, decoder, shingled_ts)
+
+    predictions = predictions + autoencoder_predictions
+    predictions = pd.Series(predictions, index=time_series.index)
+
+    return time_series, predictions
 
 
 
