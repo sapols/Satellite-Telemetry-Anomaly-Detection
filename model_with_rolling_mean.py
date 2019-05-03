@@ -4,8 +4,6 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot
 
-# Custom modules
-import nonparametric_dynamic_thresholding as ndt
 
 __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
@@ -46,7 +44,7 @@ def model_with_rolling_mean(ts, window, verbose, var_name='Value'):
     rolling_mean = pd.Series(rolling_mean, index=ts.index)
     errors = pd.Series()
 
-    # TODO: save data / plots to proper directories with encoded file names
+    # TODO: save data & plots to proper directories with encoded file names
     if verbose:
         # TODO: finalize coloring
         pyplot.plot(ts, color='black', label='Time Series')
@@ -59,7 +57,7 @@ def model_with_rolling_mean(ts, window, verbose, var_name='Value'):
     widgets = [progressbar.Percentage(), progressbar.Bar(), progressbar.Timer(), ' ', progressbar.AdaptiveETA()]
     progress_bar_sliding_window = progressbar.ProgressBar(
         widgets=[progressbar.FormatLabel('Rolling Mean errors ')] + widgets,
-        max_value=int(len(X))).start()
+        maxval=int(len(X))).start()
 
     # Get errors
     for t in range(len(X)):
