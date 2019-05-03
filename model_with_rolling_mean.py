@@ -9,7 +9,7 @@ __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
 
 
-def model_with_rolling_mean(ts, window, verbose, var_name='Value', errors=False):
+def model_with_rolling_mean(ts, window, verbose, var_name='Value', calc_errors=False):
     """Model the time series data with a rolling mean.
 
        Inputs:
@@ -20,7 +20,7 @@ def model_with_rolling_mean(ts, window, verbose, var_name='Value', errors=False)
        Optional Inputs:
            var_name [str]: The name of the dependent variable in the time series.
                            Default is 'Value'.
-           errors [bool]:  Whether or not to calculate and return errors between data and rolling mean.
+           calc_errors [bool]:  Whether or not to calculate and return errors between data and rolling mean.
 
        Outputs:
            rolling_mean [pd Series]: The rolling mean, as a pandas Series with a DatetimeIndex and a column for the rolling mean.
@@ -53,7 +53,7 @@ def model_with_rolling_mean(ts, window, verbose, var_name='Value', errors=False)
         pyplot.title('Time Series & Rolling Mean')
         pyplot.show()
 
-    if errors:
+    if calc_errors:
         # Start a progress bar
         widgets = [progressbar.Percentage(), progressbar.Bar(), progressbar.Timer(), ' ', progressbar.AdaptiveETA()]
         progress_bar_sliding_window = progressbar.ProgressBar(
