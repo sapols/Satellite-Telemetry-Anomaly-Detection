@@ -1,4 +1,5 @@
 # Standard modules
+import os
 import progressbar
 import pandas as pd
 import numpy as np
@@ -9,18 +10,19 @@ __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
 
 
-def model_with_rolling_mean(ts, window, verbose, var_name='Value', calc_errors=False):
+def model_with_rolling_mean(ts, window, ds_name, var_name='Value', verbose=False, calc_errors=False):
     """Model the time series data with a rolling mean.
 
        Inputs:
            ts [pd Series]: A pandas Series with a DatetimeIndex and a column for numerical values.
            window [int]:   Window size; the number of samples to include in the rolling mean.
-           verbose [bool]: When True, a plot of the rolling mean will be displayed.
+           ds_name [str]:  Name of the dataset {bus voltage, etc.}
 
        Optional Inputs:
-           var_name [str]: The name of the dependent variable in the time series.
-                           Default is 'Value'.
-           calc_errors [bool]:  Whether or not to calculate and return errors between data and rolling mean.
+           var_name [str]:     The name of the dependent variable in the time series.
+                               Default is 'Value'.
+           verbose [bool]:     When True, a plot of the rolling mean will be displayed.
+           calc_errors [bool]: Whether or not to calculate and return errors between data and rolling mean.
 
        Outputs:
            rolling_mean [pd Series]: The rolling mean, as a pandas Series with a DatetimeIndex and a column for the rolling mean.
@@ -29,7 +31,7 @@ def model_with_rolling_mean(ts, window, verbose, var_name='Value', calc_errors=F
            errors [pd Series]: The errors at each point, as a pandas Series with a DatetimeIndex and a column for the errors.
 
        Example:
-           rolling_mean, errors = detect_anomalies_with_rolling_mean(time_series, window_size, False)
+           rolling_mean = detect_anomalies_with_rolling_mean(time_series, window_size, 'BusVoltage', False)
     """
 
     if window <= 0:
@@ -44,13 +46,28 @@ def model_with_rolling_mean(ts, window, verbose, var_name='Value', calc_errors=F
     rolling_mean = pd.Series(rolling_mean, index=ts.index)
     errors = pd.Series()
 
-    # TODO: save data & plots to proper directories with encoded file names
+    # Save data to proper directory with encoded file name
+    ts_with_rolling_mean = pd.DataFrame({'Rolling Mean': rolling_mean, var_name: ts})
+    ts_with_rolling_mean.rename_axis('Time', axis='index', inplace=True)
+    data_filename = ds_name + '_with_rolling_mean.csv'
+    data_path = './save/datasets/' + ds_name + '/rolling mean/data/'
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+    ts_with_rolling_mean.to_csv(data_path + data_filename)
+
+    # Save plot to proper directory with encoded file name
+    ax = ts.plot(color='black', title=ds_name + ' with Rolling Mean', label=var_name, figsize=(14, 6))
+    rolling_mean.plot(color='#61AEFF', label='Rolling Mean')
+    ax.set(xlabel='Time', ylabel=var_name)
+    pyplot.legend(loc='best')
+
+    plot_filename = ds_name + '_with_rolling_mean.png'
+    plot_path = './save/datasets/' + ds_name + '/rolling mean/plots/'
+    if not os.path.exists(plot_path):
+        os.makedirs(plot_path)
+    pyplot.savefig(plot_path + plot_filename, dpi=500)
+
     if verbose:
-        # TODO: finalize coloring
-        pyplot.plot(ts, color='black', label=var_name)
-        pyplot.plot(rolling_mean, color='cyan', label='Rolling Mean')
-        pyplot.legend(loc='best')
-        pyplot.title('Time Series & Rolling Mean')
         pyplot.show()
 
     if calc_errors:
