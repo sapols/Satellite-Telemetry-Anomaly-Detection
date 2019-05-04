@@ -48,7 +48,10 @@ def model_with_rolling_mean(ts, window, ds_name, var_name='Value', verbose=False
 
     # Save data to proper directory with encoded file name
     ts_with_rolling_mean = pd.DataFrame({'Rolling Mean': rolling_mean, var_name: ts})
-    ts_with_rolling_mean.rename_axis('Time', axis='index', inplace=True)
+    ts_with_rolling_mean.rename_axis('Time', axis='index', inplace=True)  # name index 'Time'
+    column_names = [var_name, 'Rolling Mean']  # column order
+    ts_with_rolling_mean = ts_with_rolling_mean.reindex(columns=column_names)  # sort columns in specified order
+
     data_filename = ds_name + '_with_rolling_mean.csv'
     data_path = './save/datasets/' + ds_name + '/rolling mean/data/'
     if not os.path.exists(data_path):
