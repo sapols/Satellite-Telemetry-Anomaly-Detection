@@ -59,8 +59,8 @@ def model_with_rolling_mean(ts, window, ds_name, var_name='Value', verbose=False
     ts_with_rolling_mean.to_csv(data_path + data_filename)
 
     # Save plot to proper directory with encoded file name
-    ax = ts.plot(color='black', title=ds_name + ' with Rolling Mean', label=var_name, figsize=(14, 6))
-    rolling_mean.plot(color='#61AEFF', label='Rolling Mean')
+    ax = ts.plot(color='#192C87', title=ds_name + ' with Rolling Mean', label=var_name, figsize=(14, 6))
+    rolling_mean.plot(color='#0CCADC', label='Rolling Mean', linewidth=2.5)  #61AEFF is a nice baby blue
     ax.set(xlabel='Time', ylabel=var_name)
     pyplot.legend(loc='best')
 
