@@ -78,10 +78,10 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
         raise ValueError('\'seasonal_freq\' must be given when specifying a seasonal order and not grid searching.')
 
     if grid_search:
-        if verbose:
-            lag_acf = acf(ts, nlags=20)
-            lag_pacf = pacf(ts, nlags=20, method='ols')
-            pyplot.show()
+        # if verbose:
+        #     lag_acf = acf(ts, nlags=20)
+        #     lag_pacf = pacf(ts, nlags=20, method='ols')
+        #     pyplot.show()
         if seasonal_freq is None:  # ARIMA grid search
             print('No seasonal frequency was given, so grid searching ARIMA(p,d,q) hyperparameters.')
             order = grid_search_arima_params(ts)
@@ -115,29 +115,29 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
 
         current_time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         print('After fitting: ' + current_time + '\n')
-        # save the just-trained model
-        try:
-            current_time = str(datetime.now().strftime("%Y-%m-%dT%H-%M-%S"))
-            filename = 'SARIMA_' + var_name + '_' + train_size + '_' + str(order) + '_' + str(seasonal_order) + '_' + current_time + '.pkl'
-            model_dir = 'Models/'
-            if not os.path.exists(model_dir):
-                os.makedirs(model_dir)
-            filename = model_dir + filename
-            trained_model_fit.save(filename)
-        except Exception as e:
-            print('Saving model failed:')
-            print(e)
+        # # save the just-trained model
+        # try:
+        #     current_time = str(datetime.now().strftime("%Y-%m-%dT%H-%M-%S"))
+        #     filename = 'SARIMA_' + var_name + '_' + train_size + '_' + str(order) + '_' + str(seasonal_order) + '_' + current_time + '.pkl'
+        #     model_dir = 'Models/'
+        #     if not os.path.exists(model_dir):
+        #         os.makedirs(model_dir)
+        #     filename = model_dir + filename
+        #     trained_model_fit.save(filename)
+        # except Exception as e:
+        #     print('Saving model failed:')
+        #     print(e)
 
     print(trained_model_fit.summary())
 
-    if verbose:
-        # plot residual errors
-        residuals = pd.DataFrame(trained_model_fit.resid)
-        residuals.plot(title='Training Model Fit Residual Errors')
-        pyplot.show()
-        residuals.plot(kind='kde', title='Training Model Fit Residual Error Density')
-        pyplot.show()
-        print('\n')
+    # if verbose:
+    #     # plot residual errors
+    #     residuals = pd.DataFrame(trained_model_fit.resid)
+    #     residuals.plot(title='Training Model Fit Residual Errors')
+    #     pyplot.show()
+    #     residuals.plot(kind='kde', title='Training Model Fit Residual Error Density')
+    #     pyplot.show()
+    #     print('\n')
 
     # Forecast with the trained ARIMA/SARIMA model
     predictions = trained_model_fit.predict(start=1, end=len(X)-1, typ='levels')
@@ -146,15 +146,15 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
     errors = pd.Series()
 
 
-    try:
-        model_error = sqrt(mean_squared_error(X[1:len(X)], predictions_with_dates))
-        print('RMSE: %.3f' % model_error)
-        if len(test) > 0:
-            test_error = mean_squared_error(test, predictions_with_dates[test.index[0]:test.index[-1]])
-            print('Test MSE: %.3f' % test_error)
-    except Exception as e:
-        print('Forecast error calculation failed:')
-        print(e)
+    # try:
+    #     model_error = sqrt(mean_squared_error(X[1:len(X)], predictions_with_dates))
+    #     print('RMSE: %.3f' % model_error)
+    #     if len(test) > 0:
+    #         test_error = mean_squared_error(test, predictions_with_dates[test.index[0]:test.index[-1]])
+    #         print('Test MSE: %.3f' % test_error)
+    # except Exception as e:
+    #     print('Forecast error calculation failed:')
+    #     print(e)
 
     # Plot the forecast and outliers
     # TODO: add hyperparams to title?
@@ -162,10 +162,11 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
         title_text = ds_name + ' with ' + str(order) + ' ARIMA Forecast'
     else:  # SARIMA title
         title_text = ds_name + ' with ' + str(order) + '_' + str(seasonal_order) + '_' + str(trend) + ' ARIMA Forecast'
-    X.plot(color='#192C87', title=title_text, label=var_name)
+    ax = X.plot(color='#192C87', title=title_text, label=var_name, figsize=(14, 6))
     if len(test) > 0:
-        test.plot(color='purple', label='Test Data')
+        test.plot(color='#441594', label='Test Data')
     predictions_with_dates.plot(color='#0CCADC', label='ARIMA Forecast')
+    ax.set(xlabel='Time', ylabel=var_name)
     pyplot.legend(loc='best')
 
     # save the plot before showing it
@@ -180,7 +181,7 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
         os.makedirs(plot_path)
     pyplot.savefig(plot_path + plot_filename, dpi=500)
 
-    pyplot.show()
+    pyplot.show(block=False)
 
     # Save data to proper directory with encoded file name
     ts_with_arima = pd.DataFrame({'ARIMA': predictions_with_dates, var_name: ts})
@@ -217,24 +218,46 @@ if __name__ == "__main__":
         {'order': (1, 0, 0), 'seasonal_order': (0, 1, 0), 'freq': 365, 'trend': 'c'}
     ]
 
+    # 50% ARIMAs
     for ds in range(len(datasets)):
-        if ds != 0:  # skip bus voltage. TODO: delete
-            dataset = datasets[ds]
-            var_name = var_names[ds]
-            ds_name = dataset[5:-4]  # drop 'Data/' and '.csv'
-            order = hyperparams[ds]['order']
-            seasonal_order = hyperparams[ds]['seasonal_order']
-            freq = hyperparams[ds]['freq']
-            trend = hyperparams[ds]['trend']
-            print('dataset: ' + dataset)
+        dataset = datasets[ds]
+        var_name = var_names[ds]
+        ds_name = dataset[5:-4]  # drop 'Data/' and '.csv'
+        order = hyperparams[ds]['order']
+        seasonal_order = hyperparams[ds]['seasonal_order']
+        freq = hyperparams[ds]['freq']
+        trend = hyperparams[ds]['trend']
+        print('dataset: ' + dataset)
 
-            # Load the dataset
-            time_series = pd.read_csv(dataset, header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
+        # Load the dataset
+        time_series = pd.read_csv(dataset, header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
 
-            # Daily average dataset
-            time_series = time_series.resample('24H').mean()
+        # Daily average dataset
+        time_series = time_series.resample('24H').mean()
 
-            # Use custom module 'model_with_arima' which also saves plots and data
-            blah = model_with_arima(time_series, train_size=0.5, order=order, seasonal_order=seasonal_order,
-                                    seasonal_freq=freq,
-                                    var_name=var_name, verbose=True)
+        # Use custom module 'model_with_arima' which also saves plots and data
+        blah = model_with_arima(time_series, ds_name=ds_name, train_size=0.5, order=order, seasonal_order=seasonal_order,
+                                seasonal_freq=freq, trend=trend,
+                                var_name=var_name, verbose=True)
+
+    # 100% ARIMAs
+    for ds in range(len(datasets)):
+        dataset = datasets[ds]
+        var_name = var_names[ds]
+        ds_name = dataset[5:-4]  # drop 'Data/' and '.csv'
+        order = hyperparams[ds]['order']
+        seasonal_order = hyperparams[ds]['seasonal_order']
+        freq = hyperparams[ds]['freq']
+        trend = hyperparams[ds]['trend']
+        print('dataset: ' + dataset)
+
+        # Load the dataset
+        time_series = pd.read_csv(dataset, header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
+
+        # Daily average dataset
+        time_series = time_series.resample('24H').mean()
+
+        # Use custom module 'model_with_arima' which also saves plots and data
+        blah = model_with_arima(time_series, ds_name=ds_name, train_size=1, order=order, seasonal_order=seasonal_order,
+                                seasonal_freq=freq, trend=trend,
+                                var_name=var_name, verbose=True)
