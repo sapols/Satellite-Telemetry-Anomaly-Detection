@@ -23,6 +23,14 @@ __author__ = 'Shawn Polson'
 __contact__ = 'shawn.polson@colorado.edu'
 
 
+def parser(x):
+    new_time = ''.join(x.split('.')[0])  # remove microseconds from time data
+    try:
+        return datetime.strptime(new_time, '%Y-%m-%d %H:%M:%S')  # for bus voltage, battery temp, wheel temp, and wheel rpm data
+    except:
+        return datetime.strptime(new_time, '%Y-%m-%d')  # for total bus current data
+
+
 def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=None, trend=None,
                                 grid_search=False, path_to_model=None, verbose=False, ds_name='DS', var_name='Value'):
     """Detect outliers in the time series data by comparing points against an ARIMA forecast.
@@ -47,13 +55,13 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
 
 
        Outputs:
-           time_series_with_outliers [pd DataFrame]: A pandas DataFrame with a DatetimeIndex, a columns for numerical values, and an Outlier column (True or False).
+           ts_with_arima [pd DataFrame]:
 
        Optional Outputs:
            None
 
        Example:
-           time_series_with_outliers = model_with_arima(time_series, train_size=0.8, order=(12,0,0),
+           time_series_with_arima = model_with_arima(time_series, train_size=0.8, order=(12,0,0),
                                                                              seasonal_order=(0,1,0), seasonal_freq=365,
                                                                              verbose=False)
     """
@@ -148,7 +156,8 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
         print('Forecast error calculation failed:')
         print(e)
 
-    # Plot the forecast and outliers  # TODO: save plot and dataframe
+    # Plot the forecast and outliers
+    # TODO: add hyperparams to title?
     if len(seasonal_order) < 4:  # ARIMA title
         title_text = ds_name + ' with ' + str(order) + ' ARIMA Forecast'
     else:  # SARIMA title
@@ -159,6 +168,7 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
     predictions_with_dates.plot(color='#0CCADC', label='ARIMA Forecast')
     pyplot.legend(loc='best')
 
+    # save the plot before showing it
     if train_size == 1:
         plot_filename = ds_name + '_with_arima_full.png'
     elif train_size == 0.5:
@@ -172,4 +182,59 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
 
     pyplot.show()
 
-    return predictions_with_dates  # TODO: return combined with ts in dataframe
+    # Save data to proper directory with encoded file name
+    ts_with_arima = pd.DataFrame({'ARIMA': predictions_with_dates, var_name: ts})
+    ts_with_arima.rename_axis('Time', axis='index', inplace=True)  # name index 'Time'
+    column_names = [var_name, 'ARIMA']  # column order
+    ts_with_arima = ts_with_arima.reindex(columns=column_names)  # sort columns in specified order
+
+    if int(train_size) == 1:
+        data_filename = ds_name + '_with_arima_full.png'
+    elif train_size == 0.5:
+        data_filename = ds_name + '_with_arima_half.png'
+    else:
+        data_filename = ds_name + '_with_arima_' + str(train_size) + '.png'
+    data_path = './save/datasets/' + ds_name + '/arima/data/' + str(int(train_size * 100)) + ' percent/'
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+    ts_with_arima.to_csv(data_path + data_filename)
+
+    return ts_with_arima
+
+
+# TODO: remove below
+if __name__ == "__main__":
+
+    datasets = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
+                'Data/WheelTemperature.csv', 'Data/WheelRPM.csv']
+    var_names = ['Voltage (V)', 'Current (A)', 'Temperature (C)', 'Temperature (C)', 'RPM']
+
+    hyperparams = [
+        {'order': (1, 0, 0), 'seasonal_order': (0, 1, 0), 'freq': 365, 'trend': 'c'},
+        {'order': (1, 0, 2), 'seasonal_order': (0, 1, 0), 'freq': 365, 'trend': 'c'},
+        {'order': (0, 1, 0), 'seasonal_order': (0, 1, 0), 'freq': 365, 'trend': 'n'},
+        {'order': (1, 0, 0), 'seasonal_order': (0, 1, 0), 'freq': 365, 'trend': 'c'},
+        {'order': (1, 0, 0), 'seasonal_order': (0, 1, 0), 'freq': 365, 'trend': 'c'}
+    ]
+
+    for ds in range(len(datasets)):
+        if ds != 0:  # skip bus voltage. TODO: delete
+            dataset = datasets[ds]
+            var_name = var_names[ds]
+            ds_name = dataset[5:-4]  # drop 'Data/' and '.csv'
+            order = hyperparams[ds]['order']
+            seasonal_order = hyperparams[ds]['seasonal_order']
+            freq = hyperparams[ds]['freq']
+            trend = hyperparams[ds]['trend']
+            print('dataset: ' + dataset)
+
+            # Load the dataset
+            time_series = pd.read_csv(dataset, header=0, parse_dates=[0], index_col=0, squeeze=True, date_parser=parser)
+
+            # Daily average dataset
+            time_series = time_series.resample('24H').mean()
+
+            # Use custom module 'model_with_arima' which also saves plots and data
+            blah = model_with_arima(time_series, train_size=0.5, order=order, seasonal_order=seasonal_order,
+                                    seasonal_freq=freq,
+                                    var_name=var_name, verbose=True)

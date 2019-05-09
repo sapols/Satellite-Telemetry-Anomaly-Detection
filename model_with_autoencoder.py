@@ -139,15 +139,14 @@ def autoencoder_prediction(dataset_path, ds_name, path_to_model=None, var_name='
                                    Default is False.
 
        Outputs:
-            time_series [pd Series]: A pandas Series with a DatetimeIndex and a column for numerical values.
-            predictions [pd Series]: A pandas Series with a DatetimeIndex and a column for the autoencoder's predictions.
+            ts_with_autoencoder [pd DataFrame]:
 
        Optional Outputs:
            None
 
        Example:
-           time_series, predictions = autoencoder_prediction(dataset_path=dataset, train_size=0.5, var_name=name,
-                                                             verbose=True)
+           time_series_with_autoencoder = autoencoder_prediction(dataset_path=dataset, train_size=0.5, var_name=name,
+                                                                 verbose=True)
        """
 
     # Load the dataset
@@ -202,15 +201,33 @@ def autoencoder_prediction(dataset_path, ds_name, path_to_model=None, var_name='
     predictions = predictions + autoencoder_predictions
     predictions = pd.Series(predictions, index=time_series.index)
 
-    # TODO: plot, save dataframe
-
     ax = time_series.plot(color='#192C87', title=ds_name + ' with Autoencoder Predictions', label=var_name, figsize=(14, 6))
     predictions.plot(color='#0CCADC', label='Autoencoder Predictions', linewidth=1.5)  # 61AEFF is a nice baby blue
     ax.set(xlabel='Time', ylabel=var_name)
     pyplot.legend(loc='best')
+
+    # save plot before showing it
+    plot_filename = ds_name + '_with_autoencoder.png'
+    plot_path = './save/datasets/' + ds_name + '/autoencoder/plots/'
+    if not os.path.exists(plot_path):
+        os.makedirs(plot_path)
+    pyplot.savefig(plot_path + plot_filename, dpi=500)
+
     pyplot.show()
 
-    return time_series, predictions  # TODO: return combined into the dataframe
+    # Save data to proper directory with encoded file name
+    ts_with_autoencoder = pd.DataFrame({'Autoencoder': predictions, var_name: time_series})
+    ts_with_autoencoder.rename_axis('Time', axis='index', inplace=True)  # name index 'Time'
+    column_names = [var_name, 'Autoencoder']  # column order
+    ts_with_autoencoder = ts_with_autoencoder.reindex(columns=column_names)  # sort columns in specified order
+
+    data_filename = ds_name + '_with_autoencoder.csv'
+    data_path = './save/datasets/' + ds_name + '/autoencoder/data/'
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+    ts_with_autoencoder.to_csv(data_path + data_filename)
+
+    return ts_with_autoencoder
 
 
 
