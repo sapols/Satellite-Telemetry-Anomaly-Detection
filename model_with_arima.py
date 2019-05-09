@@ -189,11 +189,11 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
     ts_with_arima = ts_with_arima.reindex(columns=column_names)  # sort columns in specified order
 
     if int(train_size) == 1:
-        data_filename = ds_name + '_with_arima_full.png'
+        data_filename = ds_name + '_with_arima_full.csv'
     elif train_size == 0.5:
-        data_filename = ds_name + '_with_arima_half.png'
+        data_filename = ds_name + '_with_arima_half.csv'
     else:
-        data_filename = ds_name + '_with_arima_' + str(train_size) + '.png'
+        data_filename = ds_name + '_with_arima_' + str(train_size) + '.csv'
     data_path = './save/datasets/' + ds_name + '/arima/data/' + str(int(train_size * 100)) + ' percent/'
     if not os.path.exists(data_path):
         os.makedirs(data_path)
