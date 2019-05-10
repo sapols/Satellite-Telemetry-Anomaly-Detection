@@ -1,6 +1,7 @@
 import argparse
 import pandas as pd
 import numpy as np
+import math
 
 
 def normalizeMinMax(min, max, value):
@@ -70,7 +71,8 @@ def correlation(attribute1, fileName1, attribute2, fileName2):
     for index, row in dsJoined.iterrows():
         a = row['a']
         b = row['b']
-        numerator = numerator + (a - meanA)*(b - meanB)
+        if (not math.isnan(a) and not math.isnan(b)):  # ignore any row with a NaN
+            numerator = numerator + (a - meanA)*(b - meanB)
 
     correlationCoefficient = numerator/denominator
     return correlationCoefficient
