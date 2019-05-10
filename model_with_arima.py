@@ -157,7 +157,6 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
     #     print(e)
 
     # Plot the forecast and outliers
-    # TODO: add hyperparams to title?
     if len(seasonal_order) < 4:  # ARIMA title
         title_text = ds_name + ' with ' + str(order) + ' ARIMA Forecast'
     else:  # SARIMA title
@@ -181,7 +180,8 @@ def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=Non
         os.makedirs(plot_path)
     pyplot.savefig(plot_path + plot_filename, dpi=500)
 
-    pyplot.show(block=False)
+    #pyplot.show()
+    pyplot.clf()
 
     # Save data to proper directory with encoded file name
     ts_with_arima = pd.DataFrame({'ARIMA': predictions_with_dates, var_name: ts})
