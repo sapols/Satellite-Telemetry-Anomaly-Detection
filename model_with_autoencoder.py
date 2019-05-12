@@ -55,6 +55,9 @@ def get_autoencoder_predictions(encoder, decoder, ts):
     return predictions
 
 
+# TODO: function get_autoencoder_compressed_feature_vectors
+
+
 def seedy(s):
     np.random.seed(s)
     set_random_seed(s)
@@ -67,7 +70,7 @@ class AutoEncoder:
         # self.x = np.array([[r(), r(), r()] for _ in range(1000)])
         # self.x = np.array([[r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r()] for _ in range(1000)])
         self.x = data
-        print(self.x)
+        # print(self.x)
 
     def _encoder(self):
         inputs = Input(shape=self.x[0].shape)
@@ -98,7 +101,7 @@ class AutoEncoder:
         model = Model(inputs, dc_out)
 
         self.model = model
-        print(self.model.summary())
+        # print(self.model.summary())
         return model
 
     def fit(self, batch_size=10, epochs=300):
