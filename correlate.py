@@ -54,7 +54,10 @@ def correlation(attribute1, fileName1, attribute2, fileName2, drop=0):
     '''
     # Write code given the Input / Output Paramters.
     ds1 = pd.read_csv("./" + fileName1)
+    ds1 = ds1.iloc[drop:]
     ds2 = pd.read_csv("./" + fileName2)
+    ds2 = ds2.iloc[drop:]
+
     # Gather stats for correlation
     dsColumn1 = ds1[attribute1]
     dsColumn2 = ds2[attribute2]
@@ -69,7 +72,7 @@ def correlation(attribute1, fileName1, attribute2, fileName2, drop=0):
     numerator = 0.0  # stores summation of (a_i - meanA)(b_i - meanB)
     denominator = n * stdA * stdB
 
-    for index, row in dsJoined.iloc[drop:].iterrows():
+    for index, row in dsJoined.iterrows():
         a = row['a']
         b = row['b']
         if (not math.isnan(a) and not math.isnan(b)):  # ignore any row with a NaN
