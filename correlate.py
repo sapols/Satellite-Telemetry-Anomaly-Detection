@@ -40,13 +40,14 @@ def normalization(fileName, normalizationType, attribute):
             print(row[attribute], normalizedVal)
 
 
-def correlation(attribute1, fileName1, attribute2, fileName2):
+def correlation(attribute1, fileName1, attribute2, fileName2, drop=0):
     '''
     Input Parameters:
         attribute1: The attribute you want to consider from file1
         attribute2: The attribute you want to consider from file2
         fileName1: The comma seperated file1
         fileName2: The comma seperated file2
+        drop: The number of rows from each dataset to skip (starting at index 0)
 
     Output:
         Print the correlation coefficient
@@ -68,7 +69,7 @@ def correlation(attribute1, fileName1, attribute2, fileName2):
     numerator = 0.0  # stores summation of (a_i - meanA)(b_i - meanB)
     denominator = n * stdA * stdB
 
-    for index, row in dsJoined.iterrows():
+    for index, row in dsJoined.iloc[drop:].iterrows():
         a = row['a']
         b = row['b']
         if (not math.isnan(a) and not math.isnan(b)):  # ignore any row with a NaN
