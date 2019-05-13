@@ -51,7 +51,7 @@ def detect_anomalies(ts, normal_model, var_name, ds_name, outlier_def='std', num
     # Start a progress bar
     widgets = [progressbar.Percentage(), progressbar.Bar(), progressbar.Timer(), ' ', progressbar.AdaptiveETA()]
     progress_bar_sliding_window = progressbar.ProgressBar(
-        widgets=[progressbar.FormatLabel('Time Series Outliers (' + ds_name + ')')] + widgets,
+        widgets=[progressbar.FormatLabel('Outliers (' + ds_name + ')')] + widgets,
         maxval=int(len(X))).start()
 
     # Define outliers by distance from "normal" model
