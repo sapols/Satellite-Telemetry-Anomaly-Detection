@@ -1,4 +1,5 @@
 # Standard modules
+import os
 import progressbar
 import pandas as pd
 import numpy as np
@@ -111,5 +112,24 @@ def detect_anomalies(ts, normal_model, var_name, ds_name, outlier_def='std', num
                 outlier = pd.Series(X[i], index=[ts.index[i]])
                 outliers = outliers.append(outlier)
 
+
+    # TODO: save data and plots
+    # Save plot to proper directory with encoded file name
+    ax = ts.plot(color='#192C87', title=ds_name + ' with Rolling Mean', label=var_name, figsize=(14, 6))
+    # TODO: pass in a str for the algorithm used to get model, for the label below
+    normal_model.plot(color='#0CCADC', label='Model', linewidth=1.5)
+    if len(outliers) > 0:
+        print('\nDetected outliers: ' + str(len(outliers)) + '\n')
+        outliers.plot(color='red', style='.')
+    ax.set(xlabel='Time', ylabel=var_name)
+    pyplot.legend(loc='best')
+
+    # plot_filename = ds_name + '_with_rolling_mean.png'
+    # plot_path = './save/datasets/' + ds_name + '/rolling mean/plots/'
+    # if not os.path.exists(plot_path):
+    #     os.makedirs(plot_path)
+    # pyplot.savefig(plot_path + plot_filename, dpi=500)
+
+    pyplot.show()
 
     return time_series_with_outliers
