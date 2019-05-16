@@ -320,7 +320,7 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
 
 if __name__ == "__main__":
 
-    datasets = ['Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
+    datasets = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
                 'Data/WheelTemperature.csv', 'Data/WheelRPM.csv']
 
     # Rolling Mean
