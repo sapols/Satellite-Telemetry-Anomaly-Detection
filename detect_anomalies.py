@@ -120,7 +120,7 @@ def detect_anomalies(ts, normal_model, var_name, ds_name, outlier_def='std', num
     normal_model.plot(color='#0CCADC', label='Model', linewidth=1.5)
     if len(outliers) > 0:
         print('\nDetected outliers: ' + str(len(outliers)) + '\n')
-        outliers.plot(color='red', style='.')
+        outliers.plot(color='red', style='.', label='Outliers')
     ax.set(xlabel='Time', ylabel=var_name)
     pyplot.legend(loc='best')
 
