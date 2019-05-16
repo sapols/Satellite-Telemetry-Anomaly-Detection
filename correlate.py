@@ -40,23 +40,28 @@ def normalization(fileName, normalizationType, attribute):
             print(row[attribute], normalizedVal)
 
 
-def correlation(attribute1, fileName1, attribute2, fileName2, drop=0):
+def correlation(attribute1, fileName1, attribute2, fileName2, start=0, end=None):
     '''
     Input Parameters:
         attribute1: The attribute you want to consider from file1
         attribute2: The attribute you want to consider from file2
         fileName1: The comma seperated file1
         fileName2: The comma seperated file2
-        drop: The number of rows from each dataset to skip (starting at index 0)
+        start: The number of beginning rows from each dataset to skip (starting at index 0)
+        end:   The last row from each dataset to correlate (starting at index 0)
 
     Output:
         Print the correlation coefficient
     '''
-    # Write code given the Input / Output Paramters.
+    # Read the datasets and slice them with start and end.
     ds1 = pd.read_csv("./" + fileName1)
-    ds1 = ds1.iloc[drop:]
     ds2 = pd.read_csv("./" + fileName2)
-    ds2 = ds2.iloc[drop:]
+    if end is None:
+        ds1 = ds1.iloc[start:]
+        ds2 = ds2.iloc[start:]
+    else:
+        ds1 = ds1.iloc[start:end]
+        ds2 = ds2.iloc[start:end]
 
     # Gather stats for correlation
     dsColumn1 = ds1[attribute1]
