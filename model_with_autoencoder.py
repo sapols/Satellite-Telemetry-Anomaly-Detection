@@ -216,13 +216,19 @@ def autoencoder_prediction(dataset_path, ds_name, train_size=1.0, path_to_model=
     pyplot.legend(loc='best')
 
     # save plot before showing it
-    plot_filename = ds_name + '_with_autoencoder.png'
-    plot_path = './save/datasets/' + ds_name + '/autoencoder/plots/'
+    if int(train_size) == 1:
+        plot_filename = ds_name + '_with_autoencoder_full.png'
+    elif train_size == 0.5:
+        plot_filename = ds_name + '_with_autoencoder_half.png'
+    else:
+        plot_filename = ds_name + '_with_autoencoder_' + str(train_size) + '.png'
+    plot_path = './save/datasets/' + ds_name + '/autoencoder/plots/' + str(int(train_size * 100)) + ' percent/'
     if not os.path.exists(plot_path):
         os.makedirs(plot_path)
     pyplot.savefig(plot_path + plot_filename, dpi=500)
 
     pyplot.show()
+    pyplot.clf()  # clear the plot
 
     # Save data to proper directory with encoded file name
     ts_with_autoencoder = pd.DataFrame({'Autoencoder': predictions, var_name: time_series})
@@ -230,8 +236,13 @@ def autoencoder_prediction(dataset_path, ds_name, train_size=1.0, path_to_model=
     column_names = [var_name, 'Autoencoder']  # column order
     ts_with_autoencoder = ts_with_autoencoder.reindex(columns=column_names)  # sort columns in specified order
 
-    data_filename = ds_name + '_with_autoencoder.csv'
-    data_path = './save/datasets/' + ds_name + '/autoencoder/data/'
+    if int(train_size) == 1:
+        data_filename = ds_name + '_with_autoencoder_full.csv'
+    elif train_size == 0.5:
+        data_filename = ds_name + '_with_autoencoder_half.csv'
+    else:
+        data_filename = ds_name + '_with_autoencoder_' + str(train_size) + '.csv'
+    data_path = './save/datasets/' + ds_name + '/autoencoder/data/' + str(int(train_size * 100)) + ' percent/'
     if not os.path.exists(data_path):
         os.makedirs(data_path)
     ts_with_autoencoder.to_csv(data_path + data_filename)
