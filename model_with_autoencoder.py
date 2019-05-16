@@ -55,7 +55,15 @@ def get_autoencoder_predictions(encoder, decoder, ts):
     return predictions
 
 
-# TODO: function get_autoencoder_compressed_feature_vectors
+def get_compressed_feature_vectors(encoder, ts):
+    compressed_feature_vectors = []
+
+    for i in range(len(ts)):
+        inputs = np.array([ts[i]])
+        x = encoder.predict(inputs)  # the compressed representation
+        compressed_feature_vectors = compressed_feature_vectors + x.tolist()
+
+    return compressed_feature_vectors
 
 
 def seedy(s):
@@ -64,13 +72,16 @@ def seedy(s):
 
 
 class AutoEncoder:
-    def __init__(self, data, encoding_dim=3):
+    def __init__(self, train_data, encoding_dim=3, verbose=False):
         self.encoding_dim = encoding_dim
         r = lambda: np.random.randint(1, 3)
         # self.x = np.array([[r(), r(), r()] for _ in range(1000)])
         # self.x = np.array([[r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r(), r()] for _ in range(1000)])
-        self.x = data
+        self.x = train_data
         # print(self.x)
+        self.verbose = 0
+        if verbose:
+            self.verbose = 1
 
     def _encoder(self):
         inputs = Input(shape=self.x[0].shape)
@@ -112,7 +123,7 @@ class AutoEncoder:
                        epochs=epochs,
                        batch_size=batch_size,
                        callbacks=[tbCallBack],
-                       verbose=0)
+                       verbose=self.verbose)
 
     def save(self):
         if not os.path.exists(r'./weights'):
@@ -123,32 +134,30 @@ class AutoEncoder:
             self.model.save(r'./weights/ae_weights.h5')
 
 
-
-def autoencoder_prediction(dataset_path, ds_name, path_to_model=None, var_name='Value', plots_save_path=None,
-                           verbose=False):
+# TODO: add train_size param and use it
+def autoencoder_prediction(dataset_path, ds_name, train_size=1.0, path_to_model=None, var_name='Value', verbose=False):
     """Predict the given time series with an autoencoder.
 
        Inputs:
            dataset_path [str]: A string path to the time series data. Data is read as a pandas Series with a DatetimeIndex and a column for numerical values.
+           ds_name [str]:      The name of the dataset.
            train_size [float]: The percentage of data to use for training, as a float (e.g., 0.66).
-           ds_name [str]:
 
        Optional Inputs:
-           path_to_model [str]:    Path to a file of a trained autoencoder model. When set, no training will be done because that model will be used.
-           var_name [str]:         The name of the dependent variable in the time series.
-                                   Default is 'Value'.
-           plots_save_path [str]:  Path to save any generated plots.
-           verbose [bool]:         When True, describe the time series dataset upon loading it, and pass 'verbose=True' down the chain to any other functions called during outlier detection.
-                                   Default is False.
+           path_to_model [str]:   Path to a file of a trained autoencoder model. When set, no training will be done because that model will be used.
+           var_name [str]:        The name of the dependent variable in the time series.
+                                  Default is 'Value'.
+           verbose [bool]:        When True, describe the time series dataset upon loading it, and pass 'verbose=True' down the chain to any other functions called during outlier detection.
+                                  Default is False.
 
        Outputs:
-            ts_with_autoencoder [pd DataFrame]:
+            ts_with_autoencoder [pd DataFrame]: The original time series with an added column for this autoencoer's predictions.
 
        Optional Outputs:
            None
 
        Example:
-           time_series_with_autoencoder = autoencoder_prediction(dataset_path=dataset, train_size=0.5, var_name=name,
+           time_series_with_autoencoder = autoencoder_prediction(dataset_path=dataset, ds_name, train_size=0.5, var_name=name,
                                                                  verbose=True)
        """
 
@@ -163,10 +172,6 @@ def autoencoder_prediction(dataset_path, ds_name, path_to_model=None, var_name='
     normalized = pd.Series(X_scaled, index=time_series.index)
     time_series = normalized
 
-    # Shingle the dataset
-    window_size = 18
-    shingled_ts = shingle(time_series, window_size)
-
     if verbose:
         # describe the loaded dataset
         print(time_series.head())
@@ -174,10 +179,23 @@ def autoencoder_prediction(dataset_path, ds_name, path_to_model=None, var_name='
         time_series.plot(title=dataset_path + ' Dataset')
         pyplot.show()
 
+
+    # Shingle the dataset
+    window_size = 18
+    shingled_ts = shingle(time_series, window_size)
+
+    # Split into train and test sets
+    split = int(len(shingled_ts) * train_size)
+    train, test = shingled_ts[:split], shingled_ts[split:]
+
+    # Store unshingled test set for plotting
+    split = int(len(time_series) * train_size)
+    unshingled_test = time_series[split:]
+
     predictions = []
 
-    seedy(2)
-    ae = AutoEncoder(shingled_ts, encoding_dim=10)
+    seedy(2)  # make reproducible randomness
+    ae = AutoEncoder(train, encoding_dim=10, verbose=verbose)  # Note, training autoencoder just with train data
     ae.encoder_decoder()
     ae.fit(batch_size=50, epochs=1000)
     ae.save()
@@ -185,27 +203,15 @@ def autoencoder_prediction(dataset_path, ds_name, path_to_model=None, var_name='
     encoder = ae.encoder  # load_model(r'weights/encoder_weights.h5')
     decoder = ae.decoder  # load_model(r'weights/decoder_weights.h5')
 
-    # print('\nDone fitting the autoencoder. Testing it with an arbitrary input:')
-    #
-    # #inputs = np.array([[2, 1, 1]])
-    # inputs = np.array([[30, 31, 32, 30, 28, 31, 32, 34, 32, 32, 31, 31, 31, 30, 30, 15, 31, 31 ]])
-    # #inputs = np.array([[2, 1, 100, 20, 50, 3, 3, 3, 3, 2, 3, 3, 3, 0, 30, 5, 31, 31]])
-    # x = encoder.predict(inputs)
-    # y = decoder.predict(x)
-    #
-    # print('Input: {}'.format(inputs))
-    # print('Encoded: {}'.format(x))  # NOTE: if network always encodes to 0s, the relu's have "died"
-    # print('Decoded: {}'.format(y))
-    #
-    # print('\nActually predicting the time series now.')
-
     predictions = time_series.values[:len(time_series)%window_size].tolist()
-    autoencoder_predictions = get_autoencoder_predictions(encoder, decoder, shingled_ts)  # feed data through network
+    autoencoder_predictions = get_autoencoder_predictions(encoder, decoder, shingled_ts)  # note, network won't have seen test portion
     predictions = predictions + autoencoder_predictions
     predictions = pd.Series(predictions, index=time_series.index)
 
     ax = time_series.plot(color='#192C87', title=ds_name + ' with Autoencoder Predictions', label=var_name, figsize=(14, 6))
-    predictions.plot(color='#0CCADC', label='Autoencoder Predictions', linewidth=1.5)  # 61AEFF is a nice baby blue
+    if len(unshingled_test) > 0:
+        unshingled_test.plot(color='#441594', label='Test Data')
+    predictions.plot(color='#0CCADC', label='Autoencoder Predictions', linewidth=1)
     ax.set(xlabel='Time', ylabel=var_name)
     pyplot.legend(loc='best')
 
@@ -237,20 +243,16 @@ def autoencoder_prediction(dataset_path, ds_name, path_to_model=None, var_name='
 # if __name__ == "__main__":
 #     print('Autoencoder_Prediction.py is being run directly\n')
 #
-#     ds_num = 0  # used to select dataset path and variable name together
+#     ds_num = 3  # used to select dataset path and variable name together
 #
 #     dataset = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
 #                'Data/WheelTemperature.csv', 'Data/WheelRPM.csv'][ds_num]
 #     name = ['Voltage (V)', 'Current (A)', 'Temperature (C)', 'Temperature (C)', 'RPM'][ds_num]
 #
-#     time_series, predictions = autoencoder_prediction(dataset_path=dataset, var_name=name,
-#                                                       train_size=0.5, verbose=True)
+#     ds_name = dataset[5:-4]  # drop 'Data/' and '.csv'
 #
-#     # Plot time series with autoencoder predictions
-#     time_series.plot(color='black', title='Time Series with Autoencoder Predictions', label=name)
-#     predictions.plot(color='blue', label='Predictions')
-#     pyplot.legend(loc='best')
-#     pyplot.show()
+#     time_series, predictions = autoencoder_prediction(dataset_path=dataset, ds_name=ds_name, var_name=name,
+#                                                       train_size=0.5, verbose=True)
 #
 #
 # else:
