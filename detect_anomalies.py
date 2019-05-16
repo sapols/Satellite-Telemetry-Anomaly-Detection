@@ -287,7 +287,7 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
         outliers2.plot(color='orangered', style='.', label='Outliers (' + str(stds[1]) + ' stds)')
     if len(outliers3) > 0:
         print('\nDetected outliers (' + ds_name + ', ' + str(stds[2]) + ' stds): ' + str(len(outliers3)) + '\n')
-        outliers3.plot(color='red', style='.', label='Outliers (' + str(stds[2]) + ' stds)')
+        outliers3.plot(color='crimson', style='.', label='Outliers (' + str(stds[2]) + ' stds)')
     ax.set(xlabel='Time', ylabel=var_name)
     pyplot.legend(loc='best')
 
@@ -320,7 +320,7 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
 
 if __name__ == "__main__":
 
-    datasets = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
+    datasets = ['Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
                 'Data/WheelTemperature.csv', 'Data/WheelRPM.csv']
 
     # Rolling Mean
@@ -338,7 +338,7 @@ if __name__ == "__main__":
         # ts_with_outliers = detect_anomalies(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='std', num_stds=2,
         #                                     plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
 
-        ts_with_outliers = detect_anomalies_with_many_stds(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='std', stds=[2.0, 4.0, 8.0],
+        ts_with_outliers = detect_anomalies_with_many_stds(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='std', stds=[2, 4, 8],
                                             plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
 
 
