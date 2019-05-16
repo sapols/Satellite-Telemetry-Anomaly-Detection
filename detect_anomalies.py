@@ -208,7 +208,7 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
     widgets = [progressbar.Percentage(), progressbar.Bar(), progressbar.Timer(), ' ', progressbar.AdaptiveETA()]
     progress_bar_sliding_window = progressbar.ProgressBar(
         widgets=[progressbar.FormatLabel('Outliers (' + ds_name + ')')] + widgets,
-        maxval=int(len(X))).start()
+        maxval=int(len(X)*len(stds))).start()
 
     for i in range(len(stds)):
         num_stds = stds[i]
@@ -237,7 +237,7 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
                         outliers2 = outliers2.append(outlier)
                     elif i == 2:
                         outliers3 = outliers3.append(outlier)
-                progress_bar_sliding_window.update(t)  # advance progress bar
+                progress_bar_sliding_window.update(t*(i+1))  # advance progress bar
 
         # Define outliers by distance from mean of errors
         elif outlier_def == 'errors':
@@ -249,7 +249,7 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
                 error_point = pd.Series(error, index=[ts.index[t]])
                 errors = errors.append(error_point)
 
-                progress_bar_sliding_window.update(t)  # advance progress bar
+                progress_bar_sliding_window.update(t*(i+1))  # advance progress bar
 
             mean_of_errors = float(errors.values.mean())
             std_of_errors = float(errors.values.std(ddof=0))
