@@ -281,13 +281,13 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
     normal_model.plot(color='#0CCADC', label=alg_name, linewidth=1)
     if len(outliers1) > 0:
         print('\nDetected outliers (' + ds_name + ', ' + str(stds[0]) + ' stds): ' + str(len(outliers1)) + '\n')
-        outliers1.plot(color='orange', style='.', label='Outliers (' + str(stds[0]) + ' stds)')
+        outliers1.plot(color='orange', style='.', label='Outliers (' + str(stds[0]) + '$\sigma$)')
     if len(outliers2) > 0:
         print('\nDetected outliers (' + ds_name + ', ' + str(stds[1]) + ' stds): ' + str(len(outliers2)) + '\n')
-        outliers2.plot(color='orangered', style='.', label='Outliers (' + str(stds[1]) + ' stds)')
+        outliers2.plot(color='orangered', style='.', label='Outliers (' + str(stds[1]) + '$\sigma$)')
     if len(outliers3) > 0:
         print('\nDetected outliers (' + ds_name + ', ' + str(stds[2]) + ' stds): ' + str(len(outliers3)) + '\n')
-        outliers3.plot(color='crimson', style='.', label='Outliers (' + str(stds[2]) + ' stds)')
+        outliers3.plot(color='crimson', style='.', label='Outliers (' + str(stds[2]) + '$\sigma$)')
     ax.set(xlabel='Time', ylabel=var_name)
     pyplot.legend(loc='best')
 
