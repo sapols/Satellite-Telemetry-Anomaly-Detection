@@ -43,6 +43,7 @@ def shingle(ts, window_size=18):
     return shingled_ts
 
 
+# Given a shingled time series, return a list of floats that are the predictions
 def get_autoencoder_predictions(encoder, decoder, ts):
     predictions = []
 
@@ -55,6 +56,7 @@ def get_autoencoder_predictions(encoder, decoder, ts):
     return predictions
 
 
+# Given a shingled time series, return a numpy array where each row is an array of 10 floats (the feature vectors).
 def get_compressed_feature_vectors(encoder, ts):
     compressed_feature_vectors = []
 
@@ -63,7 +65,7 @@ def get_compressed_feature_vectors(encoder, ts):
         x = encoder.predict(inputs)  # the compressed representation
         compressed_feature_vectors = compressed_feature_vectors + x.tolist()
 
-    return compressed_feature_vectors
+    return np.array(compressed_feature_vectors)
 
 
 def seedy(s):
@@ -134,7 +136,6 @@ class AutoEncoder:
             self.model.save(r'./weights/ae_weights.h5')
 
 
-# TODO: add train_size param and use it
 def autoencoder_prediction(dataset_path, ds_name, train_size=1.0, path_to_model=None, var_name='Value', verbose=False):
     """Predict the given time series with an autoencoder.
 
@@ -230,6 +231,17 @@ def autoencoder_prediction(dataset_path, ds_name, train_size=1.0, path_to_model=
     pyplot.show()
     pyplot.clf()  # clear the plot
 
+    # Save compressed feature vectors
+    cfv = get_compressed_feature_vectors(encoder, shingled_ts)
+    if int(train_size) == 1:
+        cfv_filename = ds_name + '_compressed_by_autoencoder_full.npy'
+    elif train_size == 0.5:
+        cfv_filename = ds_name + '_compressed_by_autoencoder_half.npy'
+    else:
+        cfv_filename = ds_name + '_compressed_by_autoencoder_' + str(train_size) + '.npy'
+    cfv_path = './save/datasets/' + ds_name + '/autoencoder/data/' + str(int(train_size * 100)) + ' percent/'
+    np.save(cfv_path + cfv_filename, cfv)
+
     # Save data to proper directory with encoded file name
     ts_with_autoencoder = pd.DataFrame({'Autoencoder': predictions, var_name: time_series})
     ts_with_autoencoder.rename_axis('Time', axis='index', inplace=True)  # name index 'Time'
@@ -254,7 +266,7 @@ def autoencoder_prediction(dataset_path, ds_name, train_size=1.0, path_to_model=
 # if __name__ == "__main__":
 #     print('Autoencoder_Prediction.py is being run directly\n')
 #
-#     ds_num = 3  # used to select dataset path and variable name together
+#     ds_num = 0  # used to select dataset path and variable name together
 #
 #     dataset = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
 #                'Data/WheelTemperature.csv', 'Data/WheelRPM.csv'][ds_num]
