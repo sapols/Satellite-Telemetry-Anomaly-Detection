@@ -31,7 +31,7 @@ l_s = 250
 # number of values surrounding an error that are brought into the sequence (promotes grouping on nearby sequences
 error_buffer = 100
 # minimum percent decrease between max errors in anomalous sequences (used for pruning)
-p = 0.13
+p = 0.35
 
 
 def get_errors(y_test, y_hat, anom=None, smoothed=True):
@@ -100,7 +100,7 @@ def process_errors(y_test, e_s):
             window_size = 1
         num_windows = int((y_test.shape[0] - (batch_size * window_size)) / batch_size)
         if window_size == 1 and num_windows < 0:
-            raise ValueError("Batch_size (%s) larger than y_test (len=%s). Adjust in config.yaml." % (
+            raise ValueError("Batch_size (%s) larger than y_test (len=%s). Adjust batch_size." % (
             batch_size, y_test.shape[0]))
 
     # Identify anomalies for each new batch of values
@@ -285,7 +285,7 @@ def prune_anoms(E_seq, e_s, non_anom_max, i_anom):
         e_s_max.append(non_anom_max)  # for comparing the last actual anomaly to next highest below epsilon
 
     i_to_remove = []
-    p = 0.13  # TODO: don't hardcode this
+    p = 0.25  # TODO: don't hardcode this
 
     for i in range(0, len(e_s_max)):
         if i + 1 < len(e_s_max):
