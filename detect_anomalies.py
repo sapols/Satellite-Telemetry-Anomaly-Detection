@@ -132,6 +132,7 @@ def detect_anomalies(ts, normal_model, ds_name, var_name, alg_name, outlier_def=
             start = anom[0]
             end = anom[1]
             for i in range(start, end+1):
+                time_series_with_outliers.at[ts.index[i], 'Outlier'] = 'True'
                 outlier_points.append(X[i])
                 outlier_indices.append(ts.index[i])
         outliers = outliers.append(pd.Series(outlier_points, index=outlier_indices))
@@ -212,8 +213,8 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
     time_series_with_outliers['Outlier'] = 'False'
     column_names = [var_name, alg_name, 'Outlier']  # column order
     time_series_with_outliers1 = time_series_with_outliers.reindex(columns=column_names)  # sort columns in specified order
-    time_series_with_outliers2 = time_series_with_outliers1
-    time_series_with_outliers3 = time_series_with_outliers1
+    time_series_with_outliers2 = time_series_with_outliers.reindex(columns=column_names)  # sort columns in specified order
+    time_series_with_outliers3 = time_series_with_outliers.reindex(columns=column_names)  # sort columns in specified order
 
     # Start a progress bar
     widgets = [progressbar.Percentage(), progressbar.Bar(), progressbar.Timer(), ' ', progressbar.AdaptiveETA()]
@@ -337,8 +338,28 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
 
 
 
-# if __name__ == "__main__":
-#
+if __name__ == "__main__":
+
+    datasets = ['Data/TotalBusCurrent.csv']
+
+    for ds in range(len(datasets)):
+        ds_name = datasets[ds][5:-4]  # drop 'Data/' and '.csv'
+
+        file = 'save/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_with_rolling_mean.csv'
+        ts_with_model = pd.read_csv(file, header=0, parse_dates=[0], index_col=0, date_parser=parser)
+
+        var_name = ts_with_model.columns[0]
+        alg_name = ts_with_model.columns[1]
+
+        X = ts_with_model[var_name]
+        Y = ts_with_model[alg_name]
+
+        plot_file = './test_dir/datasets/' + ds_name + '/rolling mean/plots/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.png'
+        data_file = './test_dir/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.csv'
+
+        data = detect_anomalies(X, Y, ds_name, var_name, alg_name, outlier_def='dynamic',
+                                plot_save_path=plot_file, data_save_path=data_file)
+
 #     datasets = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
 #                 'Data/WheelTemperature.csv', 'Data/WheelRPM.csv']
 #
@@ -361,5 +382,5 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
 #                                             plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
 #
 #
-# else:
-#     print('\n')
+else:
+    print('\n')
