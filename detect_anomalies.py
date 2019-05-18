@@ -71,47 +71,55 @@ def detect_anomalies(ts, normal_model, ds_name, var_name, alg_name, outlier_def=
     if outlier_def == 'std':
         # Label outliers using standard deviations
         std = float(X.std(ddof=0))
+        outlier_points = []
+        outlier_indices = []
         for t in range(len(X)):
             obs = X[t]
             y = Y[t]
             error = abs(y - obs)
-            error_point = pd.Series(error, index=[ts.index[t]])
-            errors = errors.append(error_point)
             if error > std*num_stds:
                 time_series_with_outliers.at[ts.index[t], 'Outlier'] = 'True'
-                outlier = pd.Series(obs, index=[ts.index[t]])
-                outliers = outliers.append(outlier)
+                outlier_points.append(obs)
+                outlier_indices.append(ts.index[t])
             progress_bar_sliding_window.update(t)  # advance progress bar
+        outliers = outliers.append(pd.Series(outlier_points, index=outlier_indices))
 
     # Define outliers by distance from mean of errors
     elif outlier_def == 'errors':
         # Populate errors
+        error_points = []
+        error_indices = []
         for t in range(len(X)):
             obs = X[t]
             y = Y[t]
             error = abs(y - obs)
-            error_point = pd.Series(error, index=[ts.index[t]])
-            errors = errors.append(error_point)
+            error_points.append(error)
+            error_indices.append(ts.index[t])
 
             progress_bar_sliding_window.update(t)  # advance progress bar
+        errors = errors.append(pd.Series(error_points, index=error_indices))
 
         mean_of_errors = float(errors.values.mean())
         std_of_errors = float(errors.values.std(ddof=0))
         threshold = mean_of_errors + (std_of_errors*num_stds)
 
         # Label outliers using standard deviations from the errors' mean
+        outlier_points = []
+        outlier_indices = []
         for t in range(len(X)):
             obs = X[t]
-            y = Y[t]
             error = errors[t]
             if error > threshold:
                 time_series_with_outliers.at[ts.index[t], 'Outlier'] = 'True'
-                outlier = pd.Series(obs, index=[ts.index[t]])
-                outliers = outliers.append(outlier)
+                outlier_points.append(obs)
+                outlier_indices.append(ts.index[t])
             progress_bar_sliding_window.update(t)  # advance progress bar
+        outliers = outliers.append(pd.Series(outlier_points, index=outlier_indices))
 
     # Define outliers using JPL's nonparamatric dynamic thresholding technique
     elif outlier_def == 'dynamic':
+        outlier_points = []
+        outlier_indices = []
         smoothed_errors = ndt.get_errors(X, Y)
 
         # These are the results of the nonparametric dynamic thresholding
@@ -122,8 +130,9 @@ def detect_anomalies(ts, normal_model, ds_name, var_name, alg_name, outlier_def=
             start = anom[0]
             end = anom[1]
             for i in range(start, end+1):
-                outlier = pd.Series(X[i], index=[ts.index[i]])
-                outliers = outliers.append(outlier)
+                outlier_points.append(X[i])
+                outlier_indices.append(ts.index[i])
+            outliers = outliers.append(pd.Series(outlier_points, index=outlier_indices))
 
     # Plot anomalies
     ax = ts.plot(color='#192C87', title=ds_name + ' with ' + alg_name + ' Outliers', label=var_name, figsize=(14, 6))
@@ -209,6 +218,7 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
     progress_bar_sliding_window = progressbar.ProgressBar(
         widgets=[progressbar.FormatLabel('Outliers (' + ds_name + ')')] + widgets,
         maxval=int(len(X)*len(stds))).start()
+    progress = 0
 
     for i in range(len(stds)):
         num_stds = stds[i]
@@ -217,12 +227,12 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
         if outlier_def == 'std':
             # Label outliers using standard deviations
             std = float(X.std(ddof=0))
+            outlier_points = []
+            outlier_indices = []
             for t in range(len(X)):
                 obs = X[t]
                 y = Y[t]
                 error = abs(y - obs)
-                error_point = pd.Series(error, index=[ts.index[t]])
-                errors = errors.append(error_point)
                 if error > std * num_stds:
                     if i == 0:
                         time_series_with_outliers1.at[ts.index[t], 'Outlier'] = 'True'
@@ -230,35 +240,39 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
                         time_series_with_outliers2.at[ts.index[t], 'Outlier'] = 'True'
                     elif i == 2:
                         time_series_with_outliers3.at[ts.index[t], 'Outlier'] = 'True'
-                    outlier = pd.Series(obs, index=[ts.index[t]])
-                    if i == 0:
-                        outliers1 = outliers1.append(outlier)
-                    elif i == 1:
-                        outliers2 = outliers2.append(outlier)
-                    elif i == 2:
-                        outliers3 = outliers3.append(outlier)
-                progress_bar_sliding_window.update(t*(i+1))  # advance progress bar
+                    outlier_points.append(obs)
+                    outlier_indices.append(ts.index[t])
+                progress = progress + 1
+                progress_bar_sliding_window.update(progress)  # advance progress bar
+            if i == 0:
+                outliers1 = outliers1.append(pd.Series(outlier_points, index=outlier_indices))
+            elif i == 1:
+                outliers2 = outliers2.append(pd.Series(outlier_points, index=outlier_indices))
+            elif i == 2:
+                outliers3 = outliers3.append(pd.Series(outlier_points, index=outlier_indices))
 
         # Define outliers by distance from mean of errors
         elif outlier_def == 'errors':
             # Populate errors
+            error_points = []
+            error_indices = []
             for t in range(len(X)):
                 obs = X[t]
                 y = Y[t]
                 error = abs(y - obs)
-                error_point = pd.Series(error, index=[ts.index[t]])
-                errors = errors.append(error_point)
-
-                progress_bar_sliding_window.update(t*(i+1))  # advance progress bar
+                error_points.append(error)
+                error_indices.append(ts.index[t])
+            errors = errors.append(pd.Series(error_points, index=error_indices))
 
             mean_of_errors = float(errors.values.mean())
             std_of_errors = float(errors.values.std(ddof=0))
             threshold = mean_of_errors + (std_of_errors * num_stds)
 
             # Label outliers using standard deviations from the errors' mean
+            outlier_points = []
+            outlier_indices = []
             for t in range(len(X)):
                 obs = X[t]
-                y = Y[t]
                 error = errors[t]
                 if error > threshold:
                     if i == 0:
@@ -267,14 +281,16 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
                         time_series_with_outliers2.at[ts.index[t], 'Outlier'] = 'True'
                     elif i == 2:
                         time_series_with_outliers3.at[ts.index[t], 'Outlier'] = 'True'
-                    outlier = pd.Series(obs, index=[ts.index[t]])
-                    if i == 0:
-                        outliers1 = outliers1.append(outlier)
-                    elif i == 1:
-                        outliers2 = outliers2.append(outlier)
-                    elif i == 2:
-                        outliers3 = outliers3.append(outlier)
-                progress_bar_sliding_window.update(t)  # advance progress bar
+                    outlier_points.append(obs)
+                    outlier_indices.append(ts.index[t])
+                progress = progress + 1
+                progress_bar_sliding_window.update(progress)  # advance progress bar
+            if i == 0:
+                outliers1 = outliers1.append(pd.Series(outlier_points, index=outlier_indices))
+            elif i == 1:
+                outliers2 = outliers2.append(pd.Series(outlier_points, index=outlier_indices))
+            elif i == 2:
+                outliers3 = outliers3.append(pd.Series(outlier_points, index=outlier_indices))
 
     # Plot anomalies
     ax = ts.plot(color='#192C87', title=ds_name + ' with ' + alg_name + ' Outliers', label=var_name, figsize=(14, 6))
@@ -318,29 +334,29 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
 
 
 
-if __name__ == "__main__":
-
-    datasets = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
-                'Data/WheelTemperature.csv', 'Data/WheelRPM.csv']
-
-    # Rolling Mean
-    for ds in range(len(datasets)):
-        ds_name = datasets[ds][5:-4]  # drop 'Data/' and '.csv'
-
-        file = 'save/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_with_rolling_mean.csv'
-        ts_with_model = pd.read_csv(file, header=0, parse_dates=[0], index_col=0, date_parser=parser)
-        var_name = ts_with_model.columns[0]
-        alg_name = ts_with_model.columns[1]
-
-        x = ts_with_model[var_name]
-        y = ts_with_model[alg_name]
-
-        # ts_with_outliers = detect_anomalies(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='std', num_stds=2,
-        #                                     plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
-
-        ts_with_outliers = detect_anomalies_with_many_stds(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='std', stds=[2, 4, 8],
-                                            plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
-
-
-else:
-    print('\n')
+# if __name__ == "__main__":
+#
+#     datasets = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
+#                 'Data/WheelTemperature.csv', 'Data/WheelRPM.csv']
+#
+#     # Rolling Mean
+#     for ds in range(len(datasets)):
+#         ds_name = datasets[ds][5:-4]  # drop 'Data/' and '.csv'
+#
+#         file = 'save/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_with_rolling_mean.csv'
+#         ts_with_model = pd.read_csv(file, header=0, parse_dates=[0], index_col=0, date_parser=parser)
+#         var_name = ts_with_model.columns[0]
+#         alg_name = ts_with_model.columns[1]
+#
+#         x = ts_with_model[var_name]
+#         y = ts_with_model[alg_name]
+#
+#         ts_with_outliers = detect_anomalies(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='dynamic', num_stds=2,
+#                                             plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
+#
+#         # ts_with_outliers = detect_anomalies_with_many_stds(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='errors', stds=[2, 4, 8],
+#         #                                     plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
+#
+#
+# else:
+#     print('\n')
