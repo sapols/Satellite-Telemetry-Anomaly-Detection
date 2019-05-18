@@ -118,6 +118,7 @@ def detect_anomalies(ts, normal_model, ds_name, var_name, alg_name, outlier_def=
 
     # Define outliers using JPL's nonparamatric dynamic thresholding technique
     elif outlier_def == 'dynamic':
+        progress_bar_sliding_window.update(int(len(X))-1)  # start progress bar timer
         outlier_points = []
         outlier_indices = []
         smoothed_errors = ndt.get_errors(X, Y)
