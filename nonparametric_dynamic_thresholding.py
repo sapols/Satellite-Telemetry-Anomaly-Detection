@@ -156,6 +156,10 @@ def find_epsilon(e_s, error_buffer, sd_lim=12.0):
     max_s = 0
     sd_threshold = sd_lim  # default if no winner or too many anomalous ranges
 
+    # it is possible for sd to be 0; avoid divide by zero error
+    if sd == 0:
+        return sd_threshold
+
     for z in np.arange(2.5, sd_lim, 0.5):
         epsilon = mean + (sd * z)
         pruned_e_s, pruned_i, i_anom = [], [], []
