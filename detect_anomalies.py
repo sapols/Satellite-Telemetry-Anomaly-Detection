@@ -338,49 +338,53 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
 
 
 
-if __name__ == "__main__":
-
-    datasets = ['Data/TotalBusCurrent.csv']
-
-    for ds in range(len(datasets)):
-        ds_name = datasets[ds][5:-4]  # drop 'Data/' and '.csv'
-
-        file = 'save/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_with_rolling_mean.csv'
-        ts_with_model = pd.read_csv(file, header=0, parse_dates=[0], index_col=0, date_parser=parser)
-
-        var_name = ts_with_model.columns[0]
-        alg_name = ts_with_model.columns[1]
-
-        X = ts_with_model[var_name]
-        Y = ts_with_model[alg_name]
-
-        plot_file = './test_dir/datasets/' + ds_name + '/rolling mean/plots/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.png'
-        data_file = './test_dir/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.csv'
-
-        data = detect_anomalies(X, Y, ds_name, var_name, alg_name, outlier_def='dynamic',
-                                plot_save_path=plot_file, data_save_path=data_file)
-
-#     datasets = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
-#                 'Data/WheelTemperature.csv', 'Data/WheelRPM.csv']
+# if __name__ == "__main__":
 #
-#     # Rolling Mean
+#     datasets = ['Data/TotalBusCurrent.csv']
+#
 #     for ds in range(len(datasets)):
 #         ds_name = datasets[ds][5:-4]  # drop 'Data/' and '.csv'
 #
 #         file = 'save/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_with_rolling_mean.csv'
 #         ts_with_model = pd.read_csv(file, header=0, parse_dates=[0], index_col=0, date_parser=parser)
+#
 #         var_name = ts_with_model.columns[0]
 #         alg_name = ts_with_model.columns[1]
 #
-#         x = ts_with_model[var_name]
-#         y = ts_with_model[alg_name]
+#         X = ts_with_model[var_name]
+#         Y = ts_with_model[alg_name]
 #
-#         # ts_with_outliers = detect_anomalies(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='dynamic', num_stds=2,
-#         #                                     plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
+#         plot_file = './test_dir/datasets/' + ds_name + '/rolling mean/plots/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.png'
+#         data_file = './test_dir/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.csv'
 #
-#         ts_with_outliers = detect_anomalies_with_many_stds(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='errors', stds=[2, 4, 8],
-#                                             plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
+#         # ts_with_outliers = detect_anomalies_with_many_stds(X, Y, ds_name, var_name, alg_name=alg_name,
+#         #                                                    outlier_def='std', stds=[2, 4, 8],
+#         #                                                    plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
 #
+#         data = detect_anomalies(X, Y, ds_name, var_name, alg_name, outlier_def='dynamic',
+#                                 plot_save_path=plot_file, data_save_path=data_file)
 #
-else:
-    print('\n')
+# #     datasets = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
+# #                 'Data/WheelTemperature.csv', 'Data/WheelRPM.csv']
+# #
+# #     # Rolling Mean
+# #     for ds in range(len(datasets)):
+# #         ds_name = datasets[ds][5:-4]  # drop 'Data/' and '.csv'
+# #
+# #         file = 'save/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_with_rolling_mean.csv'
+# #         ts_with_model = pd.read_csv(file, header=0, parse_dates=[0], index_col=0, date_parser=parser)
+# #         var_name = ts_with_model.columns[0]
+# #         alg_name = ts_with_model.columns[1]
+# #
+# #         x = ts_with_model[var_name]
+# #         y = ts_with_model[alg_name]
+# #
+# #         # ts_with_outliers = detect_anomalies(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='dynamic', num_stds=2,
+# #         #                                     plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
+# #
+# #         ts_with_outliers = detect_anomalies_with_many_stds(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='errors', stds=[2, 4, 8],
+# #                                             plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
+# #
+# #
+# else:
+#     print('\n')
