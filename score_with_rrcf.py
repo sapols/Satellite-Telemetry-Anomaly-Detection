@@ -34,7 +34,7 @@ def score_with_rrcf(dataset_path, ds_name, var_name, num_trees=100, shingle_size
 
        Optional Inputs:
            num_trees [int]:    The number of trees in the generated forest.
-                               Default is 2.
+                               Default is 100.
            shingle_size [int]: The size of each shingle when shingling the time series.
                                Default is 18.
            tree_size [int]:    The size of each tree in the generated forest.
