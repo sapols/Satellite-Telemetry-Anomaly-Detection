@@ -136,9 +136,9 @@ def score_with_rrcf(dataset_path, ds_name, var_name, num_trees=100, shingle_size
 
 
 # if __name__ == "__main__":
-#     print('rrcf_anomaly_scores.py is being run directly\n')
+#     print('score_with_rrcf.py is being run directly\n')
 #
-#     ds_num = 0  # used to select dataset path and variable name together
+#     ds_num = 3  # used to select dataset path and variable name together
 #
 #     dataset = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
 #                'Data/WheelTemperature.csv', 'Data/WheelRPM.csv'][ds_num]
