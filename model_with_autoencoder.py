@@ -30,20 +30,20 @@ def parser(x):
         return datetime.strptime(new_time, '%Y-%m-%d')  # for total bus current data
 
 
-def shingle(ts, window_size=18):
+def chunk(ts, window_size=18):
     remainder = len(ts) % window_size  # if ts isn't divisible by window_size, drop the first [remainder] data points
 
-    shingled_ts = np.array([ts.values[remainder:window_size+remainder]])
+    chunked_ts = np.array([ts.values[remainder:window_size+remainder]])
     for i in range(window_size+remainder, len(ts), window_size):
-        shingle = []
+        chunk = []
         for j in range(i, i+window_size):
-            shingle.append(ts.values[j])
-        shingled_ts = np.append(shingled_ts, [shingle], axis=0)
+            chunk.append(ts.values[j])
+        chunked_ts = np.append(chunked_ts, [chunk], axis=0)
 
-    return shingled_ts
+    return chunked_ts
 
 
-# Given a shingled time series, return a list of floats that are the predictions
+# Given a chunked time series, return a list of floats that are the predictions
 def get_autoencoder_predictions(encoder, decoder, ts):
     predictions = []
 
@@ -56,7 +56,7 @@ def get_autoencoder_predictions(encoder, decoder, ts):
     return predictions
 
 
-# Given a shingled time series, return a numpy array where each row is an array of 10 floats (the feature vectors).
+# Given a chunked time series, return a numpy array where each row is an array of 10 floats (the feature vectors).
 def get_compressed_feature_vectors(encoder, ts):
     compressed_feature_vectors = []
 
@@ -181,17 +181,17 @@ def autoencoder_prediction(dataset_path, ds_name, train_size=1.0, path_to_model=
         pyplot.show()
 
 
-    # Shingle the dataset
+    # Chunk the dataset
     window_size = 18
-    shingled_ts = shingle(time_series, window_size)
+    chunked_ts = chunk(time_series, window_size)
 
     # Split into train and test sets
-    split = int(len(shingled_ts) * train_size)
-    train, test = shingled_ts[:split], shingled_ts[split:]
+    split = int(len(chunked_ts) * train_size)
+    train, test = chunked_ts[:split], chunked_ts[split:]
 
-    # Store unshingled test set for plotting
+    # Store un-chunked test set for plotting
     split = int(len(time_series) * train_size)
-    unshingled_test = time_series[split:]
+    unchunked_test = time_series[split:]
 
     predictions = []
 
@@ -205,13 +205,13 @@ def autoencoder_prediction(dataset_path, ds_name, train_size=1.0, path_to_model=
     decoder = ae.decoder  # load_model(r'weights/decoder_weights.h5')
 
     predictions = time_series.values[:len(time_series)%window_size].tolist()
-    autoencoder_predictions = get_autoencoder_predictions(encoder, decoder, shingled_ts)  # note, network won't have seen test portion
+    autoencoder_predictions = get_autoencoder_predictions(encoder, decoder, chunked_ts)  # note, network won't have seen test portion
     predictions = predictions + autoencoder_predictions
     predictions = pd.Series(predictions, index=time_series.index)
 
     ax = time_series.plot(color='#192C87', title=ds_name + ' with Autoencoder Predictions', label=var_name, figsize=(14, 6))
-    if len(unshingled_test) > 0:
-        unshingled_test.plot(color='#441594', label='Test Data')
+    if len(unchunked_test) > 0:
+        unchunked_test.plot(color='#441594', label='Test Data')
     predictions.plot(color='#0CCADC', label='Autoencoder Predictions', linewidth=1)
     ax.set(xlabel='Time', ylabel=var_name)
     pyplot.legend(loc='best')
@@ -232,7 +232,7 @@ def autoencoder_prediction(dataset_path, ds_name, train_size=1.0, path_to_model=
     pyplot.clf()  # clear the plot
 
     # Save compressed feature vectors
-    cfv = get_compressed_feature_vectors(encoder, shingled_ts)
+    cfv = get_compressed_feature_vectors(encoder, chunked_ts)
     if int(train_size) == 1:
         cfv_filename = ds_name + '_compressed_by_autoencoder_full.npy'
     elif train_size == 0.5:
