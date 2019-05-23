@@ -21,7 +21,7 @@ def parser(x):
         return datetime.strptime(new_time, '%Y-%m-%d')  # for total bus current data
 
 
-def detect_anomalies(ts, normal_model, ds_name, var_name, alg_name, outlier_def='std', num_stds=2,
+def detect_anomalies(ts, normal_model, ds_name, var_name, alg_name, outlier_def='std', num_stds=2, ndt_errors=None,
                      plot_save_path=None, data_save_path=None):
     """Detect outliers in the time series data by comparing points against a "normal" model.
 
@@ -38,6 +38,7 @@ def detect_anomalies(ts, normal_model, ds_name, var_name, alg_name, outlier_def=
                                  Default is 'std'.
            num_stds [float]:     The number of standard deviations away from the mean used to define point outliers (when applicable).
                                  Default is 2.
+           ndt_errors [list]:    Optionally skip nonparametric dynamic thresholding's 'get_errors()' and use these values instead.
            plot_save_path [str]: The file path (ending in file name *.png) for saving plots of outliers.
            data_save_path [str]: The file path (ending in file name *.csv) for saving CSVs with outliers.
 
@@ -121,7 +122,10 @@ def detect_anomalies(ts, normal_model, ds_name, var_name, alg_name, outlier_def=
         progress_bar_sliding_window.update(int(len(X))/2)  # start progress bar timer
         outlier_points = []
         outlier_indices = []
-        smoothed_errors = ndt.get_errors(X, Y)
+        if ndt_errors is not None:
+            smoothed_errors = ndt_errors
+        else:
+            smoothed_errors = ndt.get_errors(X, Y)
 
         # These are the results of the nonparametric dynamic thresholding
         E_seq, anom_scores = ndt.process_errors(X, smoothed_errors)
@@ -338,53 +342,28 @@ def detect_anomalies_with_many_stds(ts, normal_model, ds_name, var_name, alg_nam
 
 
 
-# if __name__ == "__main__":
-#
-#     datasets = ['Data/TotalBusCurrent.csv']
-#
-#     for ds in range(len(datasets)):
-#         ds_name = datasets[ds][5:-4]  # drop 'Data/' and '.csv'
-#
-#         file = 'save/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_with_rolling_mean.csv'
-#         ts_with_model = pd.read_csv(file, header=0, parse_dates=[0], index_col=0, date_parser=parser)
-#
-#         var_name = ts_with_model.columns[0]
-#         alg_name = ts_with_model.columns[1]
-#
-#         X = ts_with_model[var_name]
-#         Y = ts_with_model[alg_name]
-#
-#         plot_file = './test_dir/datasets/' + ds_name + '/rolling mean/plots/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.png'
-#         data_file = './test_dir/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.csv'
-#
-#         # ts_with_outliers = detect_anomalies_with_many_stds(X, Y, ds_name, var_name, alg_name=alg_name,
-#         #                                                    outlier_def='std', stds=[2, 4, 8],
-#         #                                                    plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
-#
-#         data = detect_anomalies(X, Y, ds_name, var_name, alg_name, outlier_def='dynamic',
-#                                 plot_save_path=plot_file, data_save_path=data_file)
-#
-# #     datasets = ['Data/BusVoltage.csv', 'Data/TotalBusCurrent.csv', 'Data/BatteryTemperature.csv',
-# #                 'Data/WheelTemperature.csv', 'Data/WheelRPM.csv']
-# #
-# #     # Rolling Mean
-# #     for ds in range(len(datasets)):
-# #         ds_name = datasets[ds][5:-4]  # drop 'Data/' and '.csv'
-# #
-# #         file = 'save/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_with_rolling_mean.csv'
-# #         ts_with_model = pd.read_csv(file, header=0, parse_dates=[0], index_col=0, date_parser=parser)
-# #         var_name = ts_with_model.columns[0]
-# #         alg_name = ts_with_model.columns[1]
-# #
-# #         x = ts_with_model[var_name]
-# #         y = ts_with_model[alg_name]
-# #
-# #         # ts_with_outliers = detect_anomalies(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='dynamic', num_stds=2,
-# #         #                                     plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
-# #
-# #         ts_with_outliers = detect_anomalies_with_many_stds(x, y, ds_name, var_name, alg_name=alg_name, outlier_def='errors', stds=[2, 4, 8],
-# #                                             plot_save_path='./test/plot.png', data_save_path='./test/data.csv')
-# #
-# #
-# else:
-#     print('\n')
+if __name__ == "__main__":
+
+    datasets = ['Data/WheelRPM.csv']
+
+    for ds in range(len(datasets)):
+        ds_name = datasets[ds][5:-4]  # drop 'Data/' and '.csv'
+
+        file = 'save/datasets/' + ds_name + '/rrcf/data/' + ds_name + '_with_rrcf_scores.csv'
+        ts_with_model = pd.read_csv(file, header=0, parse_dates=[0], index_col=0, date_parser=parser)
+        # The very last anomaly scores are null, so fill them with 0s
+        ts_with_model.fillna(value=0, inplace=True)
+
+        var_name = ts_with_model.columns[0]
+        alg_name = ts_with_model.columns[1]
+
+        X = ts_with_model[var_name]
+        Y = ts_with_model[alg_name]
+
+        plot_file = './test_dir/datasets/' + ds_name + '/rolling mean/plots/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.png'
+        data_file = './test_dir/datasets/' + ds_name + '/rolling mean/data/' + ds_name + '_rolling_mean_outliers_from_dynamic_thresholding.csv'
+
+        data = detect_anomalies(X, Y, ds_name, var_name, alg_name, outlier_def='dynamic',
+                                plot_save_path=plot_file, data_save_path=data_file)
+
+
