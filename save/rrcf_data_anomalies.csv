@@ -1,0 +1,5 @@
+,BusVoltage,TotalBusCurrent,BatteryTemperature,WheelTemperature,WheelRPM
+2σ from error mean,626.0,299.0,5280.0,26120.0,156837.0
+4σ from error mean,323.0,68.0,1789.0,13676.0,0.0
+8σ from error mean,70.0,0.0,172.0,1461.0,0.0
+Nonparametric dynamic thresholding,3356.0,0.0,5188.0,71659.0,12531.0
