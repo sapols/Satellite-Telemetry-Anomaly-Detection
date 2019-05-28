@@ -249,13 +249,13 @@ def grid_search_sarima_params(ts, freq):
 
     #trivial_data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 90.0, 80.0, 70.0, 60.0, 50.0, 40.0, 30.0, 20.0]
     data = ts.values
-    holdout_size = 0.5  # TODO: was 0.2
-    split = int(len(data) * holdout_size)
-    holdout_data = data[0:split]
+    holdout_size = 0.2  # TODO: try 0.5?
+    split = int(len(data) * (1-holdout_size))
+    training_data = data[0:split]
 
     possible_order_configs = generate_sarima_configs([freq])
 
-    configs_with_scores = get_cross_validation_scores(holdout_data, possible_order_configs)  # get cross validation scores for each order_config
+    configs_with_scores = get_cross_validation_scores(training_data, possible_order_configs)  # get cross validation scores for each order_config
 
     # TODO: don't print this?
     print('\n' + '----------------------------------GRID SEARCHING COMPLETE------------------------------------------')
