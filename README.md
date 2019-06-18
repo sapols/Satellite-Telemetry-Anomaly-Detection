@@ -1,7 +1,8 @@
 # Satellite-Telemetry-Anomaly-Detection
-Code repo for my independent study into anomaly detection for LASP satellite telemetry
+Code repo for my independent study into anomaly detection for LASP spacecraft telemetry. The aim was to explore ways to improve [WebTCAD](http://lasp.colorado.edu/home/mission-ops-data/tools-and-technologies/webtcad/)'s anomaly detection capabilities. The research is summarized in the paper's abstract:
+> This paper explores unsupervised machine learning techniques for anomaly detection in spacecraft telemetry with the aim of improving WebTCAD's automated detection abilities. WebTCAD is a tool for ad-hoc visualization and analysis of telemetry data that is built and maintained at the Laboratory for Atmospheric and Space Physics. This paper attempts to answer the question: "How good could machine learning for anomaly detection in WebTCAD be?" The techniques are applied to five representative time series datasets. Four algorithms are examined in depth: rolling means, ARIMA, autoencoders, and robust random cut forests. Then, three unsupervised anomaly definitions are examined: thresholding outlier scores with standard deviations from the data's mean, thresholding outlier scores with standard deviations from the scores' mean, and nonparametric dynamic thresholding. Observations from this exploration and suggestions for incorporating these ideas into WebTCAD and future work are included in the final two sections.
 
-## Link to Paper
+## Link to the Paper
 Read the research paper, _Unsupervised Machine Learning for Spacecraft Anomaly Detection in WebTCAD_, [here](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Paper/Unsupervised%20Machine%20Learning%20for%20Spacecraft%20Anomaly%20Detection%20in%20WebTCAD.pdf).
 
 ## Brief Directory Descriptions
