@@ -1,5 +1,5 @@
 # Satellite-Telemetry-Anomaly-Detection
-Code repo for my independent study into anomaly detection for LASP spacecraft telemetry. The aim was to explore ways to improve [WebTCAD](http://lasp.colorado.edu/home/mission-ops-data/tools-and-technologies/webtcad/)'s anomaly detection capabilities.
+Code repo for my independent study into anomaly detection for LASP spacecraft telemetry. The purpose was to explore unsupervised machine learning techniques that could be used to improve [WebTCAD](http://lasp.colorado.edu/home/mission-ops-data/tools-and-technologies/webtcad/)'s anomaly detection capabilities.
 
 
 ## Link to the Paper
