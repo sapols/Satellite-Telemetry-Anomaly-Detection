@@ -2,7 +2,7 @@
 Code repo for my independent study into anomaly detection for LASP satellite telemetry
 
 ## Link to Paper
-Read the research paper [here](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Paper/Unsupervised%20Machine%20Learning%20for%20Spacecraft%20Anomaly%20Detection%20in%20WebTCAD.pdf).
+Read the research paper, _Unsupervised Machine Learning for Spacecraft Anomaly Detection in WebTCAD_, [here](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Paper/Unsupervised%20Machine%20Learning%20for%20Spacecraft%20Anomaly%20Detection%20in%20WebTCAD.pdf).
 
 ## Brief Directory Descriptions
 
