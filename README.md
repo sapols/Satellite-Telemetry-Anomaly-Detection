@@ -7,9 +7,9 @@ Read the research paper [here](https://github.com/sapols/Satellite-Telemetry-Ano
 ## Brief Directory Descriptions
 
 Below is a brief description of each directory:
- - Data: Contains the five datasets used in this research 
- - Metadata: Contains metadata for the five datasets used in this research 
- - Paper: The research paper and the LaTex code behind it
- - demo: Contains the two Jupyter notebooks that executed the demonstrations in this research
- - explore: Contains various Jupyter notebooks that were not actually a part of the research but detect anomalies in the five datasets using a subset of techniques (ARIMA and simple statistics)
- - save: Contains all the data and plots produced by the demonstrations in demo
+ - [Data](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/tree/master/Data): Contains the five datasets used in this research 
+ - [Metadata](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/tree/master/Metadata): Contains metadata for the five datasets used in this research 
+ - [Paper](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/tree/master/Paper): The research paper and the LaTex code behind it
+ - [demo](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/tree/master/demo): Contains the two Jupyter notebooks that executed the demonstrations in this research
+ - [explore](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/tree/master/explore): Contains various Jupyter notebooks that were not actually a part of the research but detect anomalies in the five datasets using a subset of techniques (ARIMA and simple statistics)
+ - [save](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/tree/master/save): Contains all the data and plots produced by the demonstrations in demo
