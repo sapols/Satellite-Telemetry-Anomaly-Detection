@@ -7,7 +7,8 @@ Read my paper, [_Unsupervised Machine Learning for Spacecraft Anomaly Detection 
 ### Abstract
 > This paper explores unsupervised machine learning techniques for anomaly detection in spacecraft telemetry with the aim of improving WebTCAD's automated detection abilities. WebTCAD is a tool for ad-hoc visualization and analysis of telemetry data that is built and maintained at the Laboratory for Atmospheric and Space Physics. This paper attempts to answer the question: "How good could machine learning for anomaly detection in WebTCAD be?" The techniques are applied to five representative time series datasets. Four algorithms are examined in depth: rolling means, ARIMA, autoencoders, and robust random cut forests. Then, three unsupervised anomaly definitions are examined: thresholding outlier scores with standard deviations from the data's mean, thresholding outlier scores with standard deviations from the scores' mean, and nonparametric dynamic thresholding. Observations from this exploration and suggestions for incorporating these ideas into WebTCAD and future work are included in the final two sections.
 
-## Overview
+### Example 
+A time series dataset is fed into an algorithm that models what is “normal” for that data, e.g., an autoencoder. Then, using a given unsupervised anomaly definition, e.g., “an outlier is any data point whose deviation from the model is greater than four standard deviations from the mean of the model errors,” the output is a copy of the original dataset with an added column for labeling points as an Anomalies (true or false). A plot is optionally produced to visualize the results (see example below).
 
 ![pic](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/save/datasets/WheelTemperature/autoencoder/plots/50%20percent/WheelTemperature_autoencoder_half_outliers_from_error_mean.png)
 
