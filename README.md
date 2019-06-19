@@ -25,14 +25,12 @@ Below is a brief description of each code file in this repo:
  - [Detect_Standard_Deviation_Anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Detect_Standard_Deviation_Anomalies.py): j
  - [correlate.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/correlate.py): j
  - [detect_anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies.py): j
- - [](): j
- - [](): j
- - [](): j
- - [](): j
- - [](): j
- - [](): j
- - [](): j
- - [](): j
- - [](): j
- - [](): j
- - [](): j
+ - [detect_anomalies_with_ARIMA.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_ARIMA.py): j
+ - [detect_anomalies_with_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_mean.py): j
+ - [detect_anomalies_with_rolling_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_rolling_mean.py): j
+ - [grid_search_hyperparameters.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/grid_search_hyperparameters.py): j
+ - [model_with_arima.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/model_with_arima.py): j
+ - [model_with_autoencoder.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/model_with_autoencoder.py): j
+ - [model_with_rolling_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/model_with_rolling_mean.py): j
+ - [nonparametric_dynamic_thresholding.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/nonparametric_dynamic_thresholding.py): j
+ - [score_with_rrcf.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/score_with_rrcf.py): j
