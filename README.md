@@ -25,8 +25,8 @@ Below is a brief description of each directory in this repo:
 Below is a brief description of each code file in this repo:
  - [Detect_ARIMA_Anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Detect_ARIMA_Anomalies.py): j
  - [Detect_Standard_Deviation_Anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Detect_Standard_Deviation_Anomalies.py): j
- - [correlate.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/correlate.py): Calculates the correlation coefficients between two sequences of numbers of equal length, given two: CSV file paths and column names within those files. 
- - [detect_anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies.py): Detects outliers in time series data by comparing points against a “normal” model, given: the time series, the model, and an outlier definition. 
+ - [correlate.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/correlate.py): Calculates the correlation coefficients between two sequences of numbers of equal length, given two CSV file paths and a column name within each file.
+ - [detect_anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies.py): Detects outliers in time series data by comparing points against a “normal” model and a given outlier definition.
  - [detect_anomalies_with_ARIMA.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_ARIMA.py): j
  - [detect_anomalies_with_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_mean.py): j
  - [detect_anomalies_with_rolling_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_rolling_mean.py): j
