@@ -10,6 +10,15 @@ Read my paper, [_Unsupervised Machine Learning for Spacecraft Anomaly Detection 
 ### Example 
 A time series dataset is fed into an algorithm that models what is “normal” for that data, e.g., an autoencoder. Then, for a given anomaly definition, e.g., “an anomaly is any data point whose deviation from the model is greater than four standard deviations from the mean of the model errors,” the output is the dataset with an added column for labeling points as anomalies (true or false). A plot is optionally produced to visualize the results (see example below).
 
+```python
+dataset = 'Data/WheelTemperature.csv'
+ds_name = 'WheelTemperature'
+var_name = 'Temperature (C)'
+
+ts_with_model = autoencoder_prediction(dataset, ds_name, train_size=0.5, var_name=var_name)
+
+```
+
 ![pic](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/save/datasets/WheelTemperature/autoencoder/plots/50%20percent/WheelTemperature_autoencoder_half_outliers_from_error_mean.png)
 
 ## Brief Directory Descriptions
