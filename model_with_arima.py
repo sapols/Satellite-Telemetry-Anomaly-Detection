@@ -33,7 +33,7 @@ def parser(x):
 
 def model_with_arima(ts, train_size, order, seasonal_order=(), seasonal_freq=None, trend=None,
                                 grid_search=False, path_to_model=None, verbose=False, ds_name='DS', var_name='Value'):
-    """Detect outliers in the time series data by comparing points against an ARIMA forecast.
+    """Model a time series with an ARIMA forecast.
 
        Inputs:
            ts [pd Series]:     A pandas Series with a DatetimeIndex and a column for numerical values.
