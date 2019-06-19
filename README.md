@@ -41,10 +41,10 @@ Below is a brief description of each directory in this repo:
 ## Brief Code File Descriptions
 Below is a brief description of each code file in this repo:
  - [correlate.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/correlate.py): Calculates the correlation coefficient between two sequences of numbers of equal length, given two CSV file paths and a column name within each file.
- - [detect_anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies.py): Detects outliers in time series data by comparing points against a “normal” model and a given outlier definition.
+ - [detect_anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies.py): Detects anomalies in time series data by comparing points against a “normal” model and a given anomaly definition.
  - [grid_search_hyperparameters.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/grid_search_hyperparameters.py): Performs a grid search with nested cross-validation to return ARIMA hyperparameters _(p,d,q)(P,D,Q,m)_ and _trend_ for the given time series.
  - [model_with_arima.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/model_with_arima.py): j
  - [model_with_autoencoder.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/model_with_autoencoder.py): j
  - [model_with_rolling_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/model_with_rolling_mean.py): j
- - [nonparametric_dynamic_thresholding.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/nonparametric_dynamic_thresholding.py): j
+ - [nonparametric_dynamic_thresholding.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/nonparametric_dynamic_thresholding.py): Contains the code for the anomaly definition “nonparametric dynamic thresholding,” which is a thresholding approach [recently proposed by NASA'S JPL](https://arxiv.org/abs/1802.04431).
  - [score_with_rrcf.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/score_with_rrcf.py): j
