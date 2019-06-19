@@ -23,7 +23,7 @@ Below is a brief description of each code file in this repo:
  - [Autoencoder_Prediction.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Autoencoder_Prediction.py): j
  - [Detect_ARIMA_Anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Detect_ARIMA_Anomalies.py): j
  - [Detect_Standard_Deviation_Anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Detect_Standard_Deviation_Anomalies.py): j
- - [correlate.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/correlate.py): j
+ - [correlate.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/correlate.py): Calculates the correlation coefficients between two sequences of numbers of equal length, given two: file paths and column names within those files. 
  - [detect_anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies.py): j
  - [detect_anomalies_with_ARIMA.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_ARIMA.py): j
  - [detect_anomalies_with_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_mean.py): j
