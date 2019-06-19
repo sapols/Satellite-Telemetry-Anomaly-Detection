@@ -51,7 +51,7 @@ def correlation(attribute1, fileName1, attribute2, fileName2, start=0, end=None)
         end:   The last row from each dataset to correlate (starting at index 0)
 
     Output:
-        Print the correlation coefficient
+        Return the correlation coefficient
     '''
     # Read the datasets and slice them with start and end.
     ds1 = pd.read_csv("./" + fileName1)
