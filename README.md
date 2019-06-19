@@ -8,15 +8,22 @@ Read my paper, [_Unsupervised Machine Learning for Spacecraft Anomaly Detection 
 > This paper explores unsupervised machine learning techniques for anomaly detection in spacecraft telemetry with the aim of improving WebTCAD's automated detection abilities. WebTCAD is a tool for ad-hoc visualization and analysis of telemetry data that is built and maintained at the Laboratory for Atmospheric and Space Physics. This paper attempts to answer the question: "How good could machine learning for anomaly detection in WebTCAD be?" The techniques are applied to five representative time series datasets. Four algorithms are examined in depth: rolling means, ARIMA, autoencoders, and robust random cut forests. Then, three unsupervised anomaly definitions are examined: thresholding outlier scores with standard deviations from the data's mean, thresholding outlier scores with standard deviations from the scores' mean, and nonparametric dynamic thresholding. Observations from this exploration and suggestions for incorporating these ideas into WebTCAD and future work are included in the final two sections.
 
 ### Example 
-A time series dataset is fed into an algorithm that models what is “normal” for that data, e.g., an autoencoder. Then, for a given anomaly definition, e.g., “an anomaly is any data point whose deviation from the model is greater than four standard deviations from the mean of the model errors,” the output is the dataset with an added column for labeling points as anomalies (true or false). A plot is optionally produced to visualize the results (see example below).
+A common pattern for unsupervised anomaly detection is to create a model of what is “normal” for a dataset, then when data “differs greatly” from that model, that is anomalous. Using the code in this repo, a time series dataset is first fed into an algorithm that models what is “normal” for that data, e.g., an autoencoder. Then, for a given anomaly definition, e.g., “an anomaly is any data point whose deviation from the model is greater than four standard deviations from the mean of the model errors,” the output is the dataset with an added column for labeling points as anomalies (true or false). A plot is optionally produced to visualize the results (see example below).
 
 ```python
+import pandas as pd
+from model_with_autoencoder import *
+from detect_anomalies import *
+
 dataset = 'Data/WheelTemperature.csv'
 ds_name = 'WheelTemperature'
 var_name = 'Temperature (C)'
+alg_name = 'Autoencoder'
 
-ts_with_model = autoencoder_prediction(dataset, ds_name, train_size=0.5, var_name=var_name)
-
+ts_with_model = autoencoder_prediction(dataset, ds_name, var_name=var_name, train_size=0.5)
+X = ts_with_model[var_name]
+Y = ts_with_model[alg_name]
+ts_with_anomalies = detect_anomalies(X, Y, ds_name, var_name, alg_name, outlier_def='errors', num_stds=[2,4,8])
 ```
 
 ![pic](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/save/datasets/WheelTemperature/autoencoder/plots/50%20percent/WheelTemperature_autoencoder_half_outliers_from_error_mean.png)
