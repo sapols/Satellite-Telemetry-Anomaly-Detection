@@ -1,5 +1,5 @@
 # Satellite-Telemetry-Anomaly-Detection
-This is a repository for my research into anomaly detection for LASP spacecraft telemetry. It began as a semester of Independent Study for my master’s program at CU Boulder. The purpose was to explore unsupervised machine learning techniques that could be used to improve [WebTCAD](http://lasp.colorado.edu/home/mission-ops-data/tools-and-technologies/webtcad/)'s anomaly detection abilities.
+This is the repository for my research into anomaly detection for LASP spacecraft telemetry. It began as a semester of Independent Study for my master’s program at CU Boulder. The purpose was to explore unsupervised machine learning techniques that could be used to improve [WebTCAD](http://lasp.colorado.edu/home/mission-ops-data/tools-and-technologies/webtcad/)'s anomaly detection abilities.
 
 ## Link to the Paper
 Read my paper, [_Unsupervised Machine Learning for Spacecraft Anomaly Detection in WebTCAD_](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Paper/Unsupervised%20Machine%20Learning%20for%20Spacecraft%20Anomaly%20Detection%20in%20WebTCAD.pdf).
