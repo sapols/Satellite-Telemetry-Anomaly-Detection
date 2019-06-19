@@ -40,14 +40,9 @@ Below is a brief description of each directory in this repo:
 
 ## Brief Code File Descriptions
 Below is a brief description of each code file in this repo:
- - [Detect_ARIMA_Anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Detect_ARIMA_Anomalies.py): j
- - [Detect_Standard_Deviation_Anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Detect_Standard_Deviation_Anomalies.py): j
  - [correlate.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/correlate.py): Calculates the correlation coefficient between two sequences of numbers of equal length, given two CSV file paths and a column name within each file.
  - [detect_anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies.py): Detects outliers in time series data by comparing points against a “normal” model and a given outlier definition.
- - [detect_anomalies_with_ARIMA.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_ARIMA.py): j
- - [detect_anomalies_with_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_mean.py): j
- - [detect_anomalies_with_rolling_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies_with_rolling_mean.py): j
- - [grid_search_hyperparameters.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/grid_search_hyperparameters.py): j
+ - [grid_search_hyperparameters.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/grid_search_hyperparameters.py): Performs a grid search with nested cross-validation to return ARIMA hyperparameters _(p,d,q)(P,D,Q,m)_ and _trend_ for the given time series.
  - [model_with_arima.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/model_with_arima.py): j
  - [model_with_autoencoder.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/model_with_autoencoder.py): j
  - [model_with_rolling_mean.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/model_with_rolling_mean.py): j
