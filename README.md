@@ -20,7 +20,7 @@ Below is a brief description of each directory in this repo:
 
 ## Brief Code File Descriptions
 Below is a brief description of each code file in this repo:
- - [Autoencoder_Prediction.py](): j
+ - [Autoencoder_Prediction.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Autoencoder_Prediction.py): j
  - [](): j
  - [](): j
  - [](): j
