@@ -21,10 +21,10 @@ Below is a brief description of each directory in this repo:
 ## Brief Code File Descriptions
 Below is a brief description of each code file in this repo:
  - [Autoencoder_Prediction.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Autoencoder_Prediction.py): j
- - [](): j
- - [](): j
- - [](): j
- - [](): j
+ - [Detect_ARIMA_Anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Detect_ARIMA_Anomalies.py): j
+ - [Detect_Standard_Deviation_Anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/Detect_Standard_Deviation_Anomalies.py): j
+ - [correlate.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/correlate.py): j
+ - [detect_anomalies.py](https://github.com/sapols/Satellite-Telemetry-Anomaly-Detection/blob/master/detect_anomalies.py): j
  - [](): j
  - [](): j
  - [](): j
